@@ -1,0 +1,6 @@
+numpy
+mpi4py
+Pillow
+matplotlib
+Pyside2
+scikit-image
