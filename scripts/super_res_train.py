@@ -17,6 +17,8 @@ from guided_diffusion.script_util import (
 )
 from guided_diffusion.train_util import TrainLoop
 
+import blobfile as bf
+
 
 def main():
     args = create_argparser().parse_args()
@@ -32,13 +34,29 @@ def main():
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion)
 
     logger.log("creating data loader...")
-    data = load_superres_data(
-        args.data_dir,
-        args.batch_size,
-        large_size=args.large_size,
-        small_size=args.small_size,
+    data = load_data(
+        data_dir=args.data_dir,
+        batch_size=args.batch_size,
+        image_size=args.large_size,
         class_cond=args.class_cond,
     )
+
+    val_data = load_data(
+        data_dir=args.val_data_dir,
+        batch_size=args.batch_size,
+        image_size=args.large_size,
+        class_cond=args.class_cond,
+        deterministic=True,
+        num_samples=args.num_samples
+    )
+    
+    if val_data is not None:
+        # As it is deterministic, we know the indexes of the samples loaded,
+        # because they are loaded in order
+        val_indexes = []
+        for entry in sorted(bf.listdir(args.val_data_dir)):
+            entry = entry.replace(".png", "")
+            val_indexes.append(entry)
 
     logger.log("training...")
     TrainLoop(
@@ -57,6 +75,14 @@ def main():
         schedule_sampler=schedule_sampler,
         weight_decay=args.weight_decay,
         lr_anneal_steps=args.lr_anneal_steps,
+
+        val_data=val_data,
+        val_indexes=val_indexes,
+        val_interval=args.val_interval,
+        val_num_samples=args.num_samples,
+        image_size=args.large_size,
+        clip_denoised=args.clip_denoised,
+        val_out_dir=args.val_out_dir
     ).run_loop()
 
 
@@ -66,15 +92,20 @@ def load_superres_data(data_dir, batch_size, large_size, small_size, class_cond=
         batch_size=batch_size,
         image_size=large_size,
         class_cond=class_cond,
+        random_flip=False
     )
     for large_batch, model_kwargs in data:
-        model_kwargs["low_res"] = F.interpolate(large_batch, small_size, mode="area")
+        #model_kwargs["low_res"] = F.interpolate(large_batch, small_size, mode="area")
         yield large_batch, model_kwargs
 
 
 def create_argparser():
     defaults = dict(
-        data_dir="",
+        data_dir="./dataset-final/slices-dataset-png/train/hr_128",
+        val_data_dir="./dataset-final/slices-dataset-png/validate/hr_128",
+        val_out_dir="./dataset-final/slices-dataset-png/val-output",
+        num_samples=3,
+        clip_denoised=True,
         schedule_sampler="uniform",
         lr=1e-4,
         weight_decay=0.0,
@@ -83,10 +114,11 @@ def create_argparser():
         microbatch=-1,
         ema_rate="0.9999",
         log_interval=10,
-        save_interval=10000,
-        resume_checkpoint="",
+        save_interval=100,
+        val_interval=200,
+        resume_checkpoint="model000300.pt",
         use_fp16=False,
-        fp16_scale_growth=1e-3,
+        fp16_scale_growth=1e-3
     )
     defaults.update(sr_model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

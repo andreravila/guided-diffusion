@@ -16,7 +16,8 @@ def load_data(
     class_cond=False,
     deterministic=False,
     random_crop=False,
-    random_flip=True,
+    random_flip=False,
+    num_samples=None
 ):
     """
     For a dataset, create a generator over (images, kwargs) pairs.
@@ -38,7 +39,7 @@ def load_data(
     """
     if not data_dir:
         raise ValueError("unspecified data directory")
-    all_files = _list_image_files_recursively(data_dir)
+    all_files = _list_image_files_recursively(data_dir, num_samples)
     classes = None
     if class_cond:
         # Assume classes are the first part of the filename,
@@ -67,15 +68,17 @@ def load_data(
         yield from loader
 
 
-def _list_image_files_recursively(data_dir):
+def _list_image_files_recursively(data_dir, num_samples=None):
     results = []
     for entry in sorted(bf.listdir(data_dir)):
         full_path = bf.join(data_dir, entry)
         ext = entry.split(".")[-1]
-        if "." in entry and ext.lower() in ["jpg", "jpeg", "png", "gif"]:
+        if "." in entry and ext.lower() in ["jpg", "jpeg", "png", "gif","npy"]:
             results.append(full_path)
         elif bf.isdir(full_path):
             results.extend(_list_image_files_recursively(full_path))
+    if num_samples is not None:
+        results = results[:num_samples]
     return results
 
 
@@ -88,7 +91,7 @@ class ImageDataset(Dataset):
         shard=0,
         num_shards=1,
         random_crop=False,
-        random_flip=True,
+        random_flip=False,
     ):
         super().__init__()
         self.resolution = resolution
@@ -100,27 +103,59 @@ class ImageDataset(Dataset):
     def __len__(self):
         return len(self.local_images)
 
-    def __getitem__(self, idx):
-        path = self.local_images[idx]
-        with bf.BlobFile(path, "rb") as f:
-            pil_image = Image.open(f)
-            pil_image.load()
-        pil_image = pil_image.convert("RGB")
 
-        if self.random_crop:
-            arr = random_crop_arr(pil_image, self.resolution)
+    def load_and_prepare_image(self, path):
+
+        if path.endswith('.npy'):
+            with bf.BlobFile(path, "rb") as f:
+                numpy_array = np.load(f).astype(np.float32)
+            
+            # As this is not an image, cannot resize to lower sizes, just add
+            # zero padding to the borders
+            arr = fill_borders_with_zero(numpy_array, self.resolution)
+            arr = (arr * 2) - 1
         else:
-            arr = center_crop_arr(pil_image, self.resolution)
+            with bf.BlobFile(path, "rb") as f:
+                pil_image = Image.open(f)
+                pil_image.load()
 
-        if self.random_flip and random.random() < 0.5:
-            arr = arr[:, ::-1]
+            #pil_image = pil_image.convert("RGB")
+            if self.random_crop:
+                arr = random_crop_arr(pil_image, self.resolution)
+            else:
+                arr = center_crop_arr(pil_image, self.resolution)
 
-        arr = arr.astype(np.float32) / 127.5 - 1
+            if self.random_flip and random.random() < 0.5:
+                arr = arr[:, ::-1]
+
+            arr = arr.astype(np.float32) / 127.5 - 1
+            
+        # Grayscale image, add dimension
+        if arr.ndim == 2:
+            arr = np.expand_dims(arr, axis=2)
+
+        return np.transpose(arr, [2, 0, 1])
+
+    def __getitem__(self, idx):
+
+        path = self.local_images[idx]
+        arr = self.load_and_prepare_image(path)
 
         out_dict = {}
+
+        lr_path = path.replace("hr_128", "sr_16_128")
+        out_dict["low_res"] = self.load_and_prepare_image(lr_path)
+
         if self.local_classes is not None:
             out_dict["y"] = np.array(self.local_classes[idx], dtype=np.int64)
-        return np.transpose(arr, [2, 0, 1]), out_dict
+        return arr, out_dict
+
+def fill_borders_with_zero(arr, image_size):
+    if arr.shape[0] < image_size:
+        arr = np.pad(arr, ((0, image_size - arr.shape[0]), (0, 0), (0, 0)), mode="constant")
+    if arr.shape[1] < image_size:
+        arr = np.pad(arr, ((0, 0), (0, image_size - arr.shape[1]), (0, 0)), mode="constant")
+    return arr
 
 
 def center_crop_arr(pil_image, image_size):
