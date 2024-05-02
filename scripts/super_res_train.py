@@ -3,10 +3,12 @@ Train a super-resolution model.
 """
 
 import argparse
+import os
 
 import torch.nn.functional as F
 
 from guided_diffusion import dist_util, logger
+from guided_diffusion import image_datasets
 from guided_diffusion.image_datasets import load_data
 from guided_diffusion.resample import create_named_schedule_sampler
 from guided_diffusion.script_util import (
@@ -16,8 +18,6 @@ from guided_diffusion.script_util import (
     add_dict_to_argparser,
 )
 from guided_diffusion.train_util import TrainLoop
-
-import blobfile as bf
 
 
 def main():
@@ -47,19 +47,19 @@ def main():
         image_size=args.large_size,
         class_cond=args.class_cond,
         deterministic=True,
-        num_samples=args.num_samples
+        num_samples=args.val_num_samples
     )
     
     if val_data is not None:
         # As it is deterministic, we know the indexes of the samples loaded,
         # because they are loaded in order
-        val_indexes = []
-        for entry in sorted(bf.listdir(args.val_data_dir)):
-            entry = entry.replace(".png", "")
-            val_indexes.append(entry)
+        val_indexes =  image_datasets._list_image_files_recursively(args.val_data_dir, args.val_num_samples)
+        for i in range(len(val_indexes)):
+            val_indexes[i] = os.path.basename(val_indexes[i])
+            val_indexes[i], _ = os.path.splitext(val_indexes[i])
 
     logger.log("training...")
-    TrainLoop(
+    trainLoop = TrainLoop(
         model=model,
         diffusion=diffusion,
         data=data,
@@ -79,11 +79,17 @@ def main():
         val_data=val_data,
         val_indexes=val_indexes,
         val_interval=args.val_interval,
-        val_num_samples=args.num_samples,
+        val_save_suffix=args.val_save_suffix,
+        just_validate=args.just_validate,
         image_size=args.large_size,
         clip_denoised=args.clip_denoised,
         val_out_dir=args.val_out_dir
-    ).run_loop()
+    )
+
+    if args.just_validate == True:
+        trainLoop.validate()
+    else:
+        trainLoop.run_loop()
 
 
 def load_superres_data(data_dir, batch_size, large_size, small_size, class_cond=False):
@@ -104,13 +110,15 @@ def create_argparser():
         data_dir="./dataset-final/slices-dataset-png/train/hr_128",
         val_data_dir="./dataset-final/slices-dataset-png/validate/hr_128",
         val_out_dir="./dataset-final/slices-dataset-png/val-output",
-        num_samples=3,
+        just_validate = False,
+        val_save_suffix = "png",
+        val_num_samples=None,
         clip_denoised=True,
         schedule_sampler="uniform",
-        lr=1e-4,
+        lr=1e-5,
         weight_decay=0.0,
         lr_anneal_steps=0,
-        batch_size=1,
+        batch_size=2,
         microbatch=-1,
         ema_rate="0.9999",
         log_interval=10,

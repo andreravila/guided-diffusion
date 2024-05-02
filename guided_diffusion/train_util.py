@@ -46,16 +46,18 @@ class TrainLoop:
         val_data=None,
         val_indexes=None,
         val_interval=1000,
-        val_num_samples=None,
+        val_save_suffix=None,
         val_out_dir=None,
+        just_validate=False,
         image_size=None,
         clip_denoised=False,
     ):
         self.val_interval = val_interval
         self.val_data = val_data
         self.val_indexes = val_indexes
-        self.val_num_samples = val_num_samples
+        self.val_save_suffix = val_save_suffix
         self.val_out_dir = val_out_dir
+        self.just_validate = just_validate
         self.image_size = image_size
         self.clip_denoised = clip_denoised
 
@@ -287,55 +289,98 @@ class TrainLoop:
         avg_psnr = 0
         avg_ssim = 0
         start_time = time.time()
-        while s < self.val_num_samples:
+        batch_size = self.batch_size 
+
+        # The len of val_indexes is the number of samples is the number of items in the validation
+        # directory if num_samples is not specified, otherwise it is equal to num_samples
+        val_num_samples = len(self.val_indexes)
+
+        while s < val_num_samples:
 
             high_res, model_kwargs = next(self.val_data)
             model_kwargs = {k: v.to(dist_util.dev()) for k, v in model_kwargs.items()}
+
+            if val_num_samples - s < batch_size:
+                batch_size = val_num_samples - s
+                model_kwargs['low_res'] = model_kwargs['low_res'][:batch_size]
+
             sample = self.diffusion.p_sample_loop(
                 self.model,
-                (self.batch_size, 1, self.image_size, self.image_size),
+                (batch_size, 1, self.image_size, self.image_size),
                 clip_denoised=self.clip_denoised,
                 model_kwargs=model_kwargs,
             )
 
-            for i in range(0, high_res.size(0)):
+            for i in range(0, batch_size):
                 index = self.val_indexes[ s + i]
 
-                out_path = os.path.join(self.val_out_dir, f"{self.step}_{index}_hr.png")
-                high_res_array = high_res[i][0].numpy()
-                high_res_array = ((high_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
-                Image.fromarray(high_res_array).save(out_path)
+                # When just validating, we only want to save the output of the model,
+                # which is the super-resolution image
+                if self.just_validate == True:
+                    out_path_sr = os.path.join(self.val_out_dir, f"{index}_sr.{self.val_save_suffix}")
+                    super_res_array = sample[i][0].cpu().numpy()
+                    high_res_array = high_res[i][0].numpy()
 
-                out_path = os.path.join(self.val_out_dir, f"{self.step}_{index}_lr.png")
-                low_res_array = model_kwargs['low_res'][i][0].cpu().numpy()
-                low_res_array = ((low_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
-                Image.fromarray(high_res_array).save(out_path)
+                    if self.val_save_suffix == "npy":
+                        super_res_array = transform_and_save_npy(super_res_array, out_path_sr)
+                        high_res_array = (high_res_array + 1) / 2
+                        data_range=1
+                    else:
+                        super_res_array = transform_and_save_image(super_res_array, out_path_sr)
+                        high_res_array = ((high_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
+                        data_range=255
 
-                out_path = os.path.join(self.val_out_dir, f"{self.step}_{index}_sr.png")
-                super_res_array = sample[i][0].cpu().numpy()
-                super_res_array = ((super_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
-                Image.fromarray(super_res_array).save(out_path)
+                else:
+                    out_path_hr = os.path.join(self.val_out_dir, f"{self.step}_{index}_hr.{self.val_save_suffix}")
+                    high_res_array = high_res[i][0].numpy()
+
+                    out_path_lr = os.path.join(self.val_out_dir, f"{self.step}_{index}_lr.{self.val_save_suffix}")
+                    low_res_array = model_kwargs['low_res'][i][0].cpu().numpy()
+
+                    out_path_sr = os.path.join(self.val_out_dir, f"{self.step}_{index}_sr.{self.val_save_suffix}")
+                    super_res_array = sample[i][0].cpu().numpy()
+
+                    if self.val_save_suffix == "npy":
+                        high_res_array = transform_and_save_npy(high_res_array, out_path_hr)
+                        low_res_array =  transform_and_save_npy(low_res_array, out_path_lr)
+                        super_res_array = transform_and_save_npy(super_res_array, out_path_sr)
+                        data_range=1
+                    else:
+                        high_res_array = transform_and_save_image(high_res_array, out_path_hr)
+                        low_res_array = transform_and_save_image(low_res_array, out_path_lr)
+                        super_res_array = transform_and_save_image(super_res_array, out_path_sr)
+                        data_range=255
 
                 avg_psnr += peak_signal_noise_ratio(high_res_array, super_res_array)
-                avg_ssim += structural_similarity(high_res_array, super_res_array, data_range=255)
+                avg_ssim += structural_similarity(high_res_array, super_res_array, data_range=data_range)
 
-            logger.log(f"created {str(s + high_res.size(0))} samples")
-            s += self.batch_size
+            logger.log(f"created {str(s + batch_size)} samples")
+            s += batch_size
 
-        avg_psnr /= self.val_num_samples
-        avg_ssim /= self.val_num_samples
+        avg_psnr /= val_num_samples
+        avg_ssim /= val_num_samples
         total_time = int(time.time() - start_time)
 
-        logger.log(f"Step {self.resume_step}:")
+        logger.log(f"Step {self.step}:")
         logger.log(f"Average PSNR: {avg_psnr}, Average SSIM: {avg_ssim}, Total sampling time: {str(total_time)} seconds")
 
 
         with open(os.path.join(self.val_out_dir, "sampling.txt"),"a") as file:
-            file.write(f"Step {self.resume_step}:\n")
+            file.write(f"Step {self.step}:\n")
             file.write(f"Average PSNR: {avg_psnr}, Average SSIM: {avg_ssim}, Total sampling time: {str(total_time)} seconds")
 
         dist.barrier()
         logger.log("sampling complete")
+
+def transform_and_save_image(sample_array, path):
+    sample_array = ((sample_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
+    Image.fromarray(sample_array).save(path)
+    return sample_array
+
+def transform_and_save_npy(sample_array, path):
+    sample_array = (sample_array + 1) / 2
+    np.save(path, sample_array)
+    return sample_array
 
 
 def parse_resume_step_from_filename(filename):

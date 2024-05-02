@@ -12,9 +12,11 @@
             "console": "integratedTerminal",
             "args": [
                 "--large_size",
-                "64",
+                "128",
                 "--small_size",
-                "64"
+                "128",
+                "--diffusion_steps",
+                "1000"
             ]
         }
     ]
