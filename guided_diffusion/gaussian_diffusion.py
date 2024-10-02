@@ -432,8 +432,9 @@ class GaussianDiffusion:
             (t != 0).float().view(-1, *([1] * (len(x.shape) - 1)))
         )  # no noise when t == 0
         if cond_fn is not None:
+            # Fix from https://github.com/openai/guided-diffusion/issues/51
             out["mean"] = self.condition_mean(
-                cond_fn, out, x, t, model_kwargs=model_kwargs
+                cond_fn, out, out["mean"], t-1, model_kwargs=model_kwargs
             )
         sample = out["mean"] + nonzero_mask * th.exp(0.5 * out["log_variance"]) * noise
         return {"sample": sample, "pred_xstart": out["pred_xstart"]}
