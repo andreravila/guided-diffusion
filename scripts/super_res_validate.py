@@ -85,17 +85,17 @@ def main():
 
             out_path = os.path.join(args.out_dir, f"{resume_step}_{index}_hr.png")
             high_res_array = high_res[i][0].numpy()
-            high_res_array = ((high_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
+            high_res_array = np.round(((high_res_array + 1) * 127.5).clip(0, 255)).astype(np.uint8)
             Image.fromarray(high_res_array).save(out_path)
 
             out_path = os.path.join(args.out_dir, f"{resume_step}_{index}_lr.png")
             low_res_array = model_kwargs['low_res'][i][0].cpu().numpy()
-            low_res_array = ((low_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
+            low_res_array = np.round(((low_res_array + 1) * 127.5).clip(0, 255)).astype(np.uint8)
             Image.fromarray(high_res_array).save(out_path)
 
             out_path = os.path.join(args.out_dir, f"{resume_step}_{index}_sr.png")
             super_res_array = sample[i][0].cpu().numpy()
-            super_res_array = ((super_res_array + 1) * 127.5).clip(0, 255).astype(np.uint8)
+            super_res_array = np.round(((super_res_array + 1) * 127.5).clip(0, 255)).astype(np.uint8)
             Image.fromarray(super_res_array).save(out_path)
 
             avg_psnr += peak_signal_noise_ratio(high_res_array, super_res_array)
