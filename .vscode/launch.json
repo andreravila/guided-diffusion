@@ -16,7 +16,7 @@
                 "--small_size",
                 "128",
                 "--diffusion_steps",
-                "1000"
+                "2000"
             ]
         }
     ]
