@@ -107,9 +107,9 @@ def load_superres_data(data_dir, batch_size, large_size, small_size, class_cond=
 
 def create_argparser():
     defaults = dict(
-        data_dir="./dataset-final/slices-dataset-png/train/hr_128",
-        val_data_dir="./dataset-final/slices-dataset-png/validate/hr_128",
-        val_out_dir="./dataset-final/slices-dataset-png/val-output",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/train/hr_128",
+        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/validate-6/hr_128",
+        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_npy/val-output",
         just_validate = False,
         val_save_suffix = "png",
         val_num_samples=None,
@@ -118,13 +118,13 @@ def create_argparser():
         lr=1e-5,
         weight_decay=0.0,
         lr_anneal_steps=0,
-        batch_size=2,
-        microbatch=-1,
+        batch_size=128,
+        microbatch=12,
         ema_rate="0.9999",
         log_interval=10,
-        save_interval=100,
-        val_interval=200,
-        resume_checkpoint="model000300.pt",
+        save_interval=1000,
+        val_interval=500,
+        resume_checkpoint="",
         use_fp16=False,
         fp16_scale_growth=1e-3
     )
@@ -136,3 +136,5 @@ def create_argparser():
 
 if __name__ == "__main__":
     main()
+
+# python3 scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 2000
