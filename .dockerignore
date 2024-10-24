@@ -4,10 +4,9 @@ classify_image_graph_def.pb
 
 dataset-final
 
-dataset3T*
-
 guided_diffusion.egg*
 
 test-models*
 
 sliced_dataset
+.venv
