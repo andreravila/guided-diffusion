@@ -30,7 +30,7 @@
 		]
 		}
 	  },
-	"postCreateCommand": "sudo chown -R $USER:$USER /home/ && pip install -e . && sudo apt update && sudo apt install -y  libopenmpi-dev && pip install -r requirements.txt"
+	"postCreateCommand": "sudo chown -R $USER:$USER /home/ && pip install -e . && sudo apt update && sudo apt install -y libopenmpi-dev && pip install -r requirements.txt"
 
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
