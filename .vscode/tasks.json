@@ -1,0 +1,158 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run-debug-container",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-p",
+                "6502:6502",
+                "-d",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "guided-diffusion-debug"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-debug-container"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "debug"
+            },
+        },
+        {
+            "label": "build-debug-container",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=debug",
+                "-t",
+                "guided-diffusion-debug",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "debug"
+            },
+        },
+        {
+            "label": "run-production-container",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "guided-diffusion-production"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-production-container"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "debug"
+            },
+        },
+        {
+            "label": "build-production-container",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=production",
+                "-t",
+                "guided-diffusion-production",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "debug"
+            },
+        },
+        {
+            "label": "stop-containers",
+            "detail": "",
+            "command": "bash",
+            "type": "shell",
+            "args": [
+                "-c",
+                "docker stop $(docker ps -a -q)"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "debug"
+            },
+        },
+
+    ]
+}

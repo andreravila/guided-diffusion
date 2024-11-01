@@ -18,6 +18,40 @@
                 "--diffusion_steps",
                 "2000"
             ]
+        },
+        {
+            "name": "Python Debug",
+            "type": "debugpy",
+            "request": "attach",
+            "justMyCode": false,
+            "connect": {
+                "host": "localhost",
+                "port": "6502"
+            },
+            "pathMappings": [
+                {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/home/test"
+                }
+            ],
+            "preLaunchTask": "run-debug-container"
+        },
+        {
+            "name": "Python Production",
+            "type": "debugpy",
+            "request": "attach",
+            "justMyCode": false,
+            "connect": {
+                "host": "6502",
+                "port": "6502"
+            },
+            "pathMappings": [
+                {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/home/test"
+                }
+            ],
+            "preLaunchTask": "run-production-container"
         }
     ]
 }
