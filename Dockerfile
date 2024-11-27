@@ -48,9 +48,9 @@ COPY guided_diffusion guided_diffusion
 ARG RUN_MODE
 
 RUN if [ "$RUN_MODE" = "production" ]; then \
-        echo "python3 scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 1000" > startcommand.sh; \
+        echo "python3 scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 2000" > startcommand.sh; \
     elif [ "$RUN_MODE" = "debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 1000" > startcommand.sh; \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 2000" > startcommand.sh; \
     else \
         echo "Unknown RUN_MODE: $RUN_MODE"; \
         exit 1; \
@@ -63,7 +63,7 @@ CMD . .venv/bin/activate && ./startcommand.sh
 
 # command to execute the container
 # docker build --build-arg RUN_MODE=production -t guided-diffusion .
-# docker run -v ./tmp:/tmp -v ./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced --gpus all guided-diffusion
+#  docker run -v ./checkpoint_model:/home/test/checkpoint_model -v ./tmp:/tmp -v ./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced --gpus all -m=32g  --shm-size=2g guided-diffusion-production
 # consult vscode tasks.json
 
 # TODO: Move the debug to here also

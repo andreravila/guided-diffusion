@@ -10,6 +10,6 @@ guided_diffusion.egg*
 
 test-models*
 
-sliced_dataset
+sliced_dataset*
 
-/tmp
+tmp
