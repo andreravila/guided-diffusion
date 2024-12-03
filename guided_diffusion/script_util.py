@@ -3,7 +3,7 @@ import inspect
 
 from . import gaussian_diffusion as gd
 from .respace import SpacedDiffusion, space_timesteps
-from .unet import SuperResModel, UNetModel, EncoderUNetModel
+from .unet import EncoderSuperResModel, SuperResModel, UNetModel, EncoderUNetModel
 
 NUM_CLASSES = 1000
 
@@ -264,6 +264,97 @@ def create_classifier(
         resblock_updown=classifier_resblock_updown,
         pool=classifier_pool,
     )
+
+def sr_classifier_and_diffusion_defaults():
+    res = classifier_defaults()
+    res.update(diffusion_defaults())
+    res["large_size"] = 256
+    res["small_size"] = 64
+    return res
+
+def sr_create_classifier_and_diffusion(
+    image_size,
+    large_size,
+    small_size,
+    classifier_use_fp16,
+    classifier_width,
+    classifier_depth,
+    classifier_attention_resolutions,
+    classifier_use_scale_shift_norm,
+    classifier_resblock_updown,
+    classifier_pool,
+    learn_sigma,
+    diffusion_steps,
+    noise_schedule,
+    timestep_respacing,
+    use_kl,
+    predict_xstart,
+    rescale_timesteps,
+    rescale_learned_sigmas,
+):
+    classifier = sr_create_classifier(
+        large_size,
+        classifier_use_fp16,
+        classifier_width,
+        classifier_depth,
+        classifier_attention_resolutions,
+        classifier_use_scale_shift_norm,
+        classifier_resblock_updown,
+        classifier_pool,
+    )
+    diffusion = create_gaussian_diffusion(
+        steps=diffusion_steps,
+        learn_sigma=learn_sigma,
+        noise_schedule=noise_schedule,
+        use_kl=use_kl,
+        predict_xstart=predict_xstart,
+        rescale_timesteps=rescale_timesteps,
+        rescale_learned_sigmas=rescale_learned_sigmas,
+        timestep_respacing=timestep_respacing,
+    )
+    return classifier, diffusion
+
+
+def sr_create_classifier(
+    image_size,
+    classifier_use_fp16,
+    classifier_width,
+    classifier_depth,
+    classifier_attention_resolutions,
+    classifier_use_scale_shift_norm,
+    classifier_resblock_updown,
+    classifier_pool,
+):
+    if image_size == 512:
+        channel_mult = (0.5, 1, 1, 2, 2, 4, 4)
+    elif image_size == 256:
+        channel_mult = (1, 1, 2, 2, 4, 4)
+    elif image_size == 128:
+        channel_mult = (1, 1, 2, 3, 4)
+    elif image_size == 64:
+        channel_mult = (1, 2, 3, 4)
+    else:
+        raise ValueError(f"unsupported image size: {image_size}")
+
+    attention_ds = []
+    for res in classifier_attention_resolutions.split(","):
+        attention_ds.append(image_size // int(res))
+
+    return EncoderSuperResModel(
+        image_size=image_size,
+        in_channels=1,
+        model_channels=classifier_width,
+        out_channels=1000,
+        num_res_blocks=classifier_depth,
+        attention_resolutions=tuple(attention_ds),
+        channel_mult=channel_mult,
+        use_fp16=classifier_use_fp16,
+        num_head_channels=64,
+        use_scale_shift_norm=classifier_use_scale_shift_norm,
+        resblock_updown=classifier_resblock_updown,
+        pool=classifier_pool,
+    )
+
 
 
 def sr_model_and_diffusion_defaults():

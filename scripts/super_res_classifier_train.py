@@ -21,6 +21,8 @@ from guided_diffusion.script_util import (
     args_to_dict,
     classifier_and_diffusion_defaults,
     create_classifier_and_diffusion,
+    sr_classifier_and_diffusion_defaults,
+    sr_create_classifier_and_diffusion,
 )
 from guided_diffusion.train_util import parse_resume_step_from_filename, log_loss_dict
 
@@ -32,8 +34,8 @@ def main():
     logger.configure()
 
     logger.log("creating model and diffusion...")
-    model, diffusion = create_classifier_and_diffusion(
-        **args_to_dict(args, classifier_and_diffusion_defaults().keys())
+    model, diffusion = sr_create_classifier_and_diffusion(
+        **args_to_dict(args, sr_classifier_and_diffusion_defaults().keys())
     )
     model.to(dist_util.dev())
     if args.noised:
@@ -74,10 +76,11 @@ def main():
     data = load_data(
         data_dir=args.data_dir,
         batch_size=args.batch_size,
-        image_size=args.image_size,
+        image_size=args.large_size,
         class_cond=True,
-        random_crop=True,
+        random_crop=False,
     )
+
     if args.val_data_dir:
         val_data = load_data(
             data_dir=args.val_data_dir,
@@ -113,10 +116,10 @@ def main():
         else:
             t = th.zeros(batch.shape[0], dtype=th.long, device=dist_util.dev())
 
-        for i, (sub_batch, sub_labels, sub_t) in enumerate(
-            split_microbatches(args.microbatch, batch, labels, t)
+        for i, (sub_batch, sub_low_res, sub_labels, sub_t) in enumerate(
+            split_microbatches(args.microbatch, batch, extra['low_res'], labels, t)
         ):
-            logits = model(sub_batch, timesteps=sub_t)
+            logits = model(sub_batch, timesteps=sub_t, low_res=sub_low_res)
             loss = F.cross_entropy(logits, sub_labels, reduction="none")
 
             losses = {}
@@ -201,22 +204,28 @@ def split_microbatches(microbatch, *args):
 
 def create_argparser():
     defaults = dict(
-        data_dir="",
-        val_data_dir="",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/train/hr_128",
+        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/validate-6/hr_128",
+        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_npy/val-output",
+        just_validate = False,
+        val_save_suffix = "png",
+        val_num_samples=None,
         noised=True,
         iterations=150000,
         lr=3e-4,
         weight_decay=0.0,
         anneal_lr=False,
         batch_size=4,
-        microbatch=-1,
+        microbatch=1,
         schedule_sampler="uniform",
         resume_checkpoint="",
         log_interval=10,
         eval_interval=5,
         save_interval=10000,
+        use_fp16=False,
+        fp16_scale_growth=1e-3
     )
-    defaults.update(classifier_and_diffusion_defaults())
+    defaults.update(sr_classifier_and_diffusion_defaults())
     parser = argparse.ArgumentParser()
     add_dict_to_argparser(parser, defaults)
     return parser
