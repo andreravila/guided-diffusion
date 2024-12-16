@@ -1,4 +1,4 @@
 {
-    // debug, production, classifier_debug, classifier_production
-    "runMode": "debug"
+    // debug, production, classifier-debug, classifier-production
+    "runMode": "production"
 }
