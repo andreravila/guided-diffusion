@@ -17,6 +17,7 @@ def load_data(
     deterministic=False,
     random_crop=False,
     random_flip=False,
+    use_fp16=False,
     num_samples=None
 ):
     """
@@ -60,6 +61,7 @@ def load_data(
         num_shards=MPI.COMM_WORLD.Get_size(),
         random_crop=random_crop,
         random_flip=random_flip,
+        use_fp16=use_fp16
     )
     
     if len(dataset) < batch_size:
@@ -100,6 +102,7 @@ class ImageDataset(Dataset):
         num_shards=1,
         random_crop=False,
         random_flip=False,
+        use_fp16=False
     ):
         super().__init__()
         self.resolution = resolution
@@ -107,6 +110,7 @@ class ImageDataset(Dataset):
         self.local_classes = None if classes is None else classes[shard:][::num_shards]
         self.random_crop = random_crop
         self.random_flip = random_flip
+        self.use_fp16 = use_fp16
 
     def __len__(self):
         return len(self.local_images)
@@ -116,7 +120,7 @@ class ImageDataset(Dataset):
 
         if path.endswith('.npy'):
             with bf.BlobFile(path, "rb") as f:
-                numpy_array = np.load(f).astype(np.float32)
+                numpy_array = np.load(f).astype(np.float16 if self.use_fp16 else np.float32)
             
             # As this is not an image, cannot resize to lower sizes, just add
             # zero padding to the borders
@@ -136,7 +140,7 @@ class ImageDataset(Dataset):
             if self.random_flip and random.random() < 0.5:
                 arr = arr[:, ::-1]
 
-            arr = arr.astype(np.float32) / 127.5 - 1
+            arr = arr.astype(np.float16 if self.use_fp16 else np.float32) / 127.5 - 1
             
         # Grayscale image, add dimension
         if arr.ndim == 2:

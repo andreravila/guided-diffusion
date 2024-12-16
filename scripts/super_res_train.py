@@ -39,6 +39,7 @@ def main():
         batch_size=args.batch_size,
         image_size=args.large_size,
         class_cond=args.class_cond,
+        use_fp16=args.use_fp16
     )
 
     val_data = load_data(
@@ -47,6 +48,7 @@ def main():
         image_size=args.large_size,
         class_cond=args.class_cond,
         deterministic=True,
+        use_fp16=args.use_fp16,
         num_samples=args.val_num_samples
     )
     

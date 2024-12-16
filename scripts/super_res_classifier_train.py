@@ -79,6 +79,7 @@ def main():
         image_size=args.large_size,
         class_cond=True,
         random_crop=False,
+        use_fp16=args.classifier_use_fp16,
     )
 
     if args.val_data_dir:
@@ -87,6 +88,7 @@ def main():
             batch_size=args.batch_size,
             image_size=args.image_size,
             class_cond=True,
+            use_fp16=args.classifier_use_fp16,
         )
     else:
         val_data = None

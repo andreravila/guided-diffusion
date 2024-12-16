@@ -21,12 +21,12 @@
                 "all",
                 "-m=32g",
                 "--shm-size=2g",
-                "guided-diffusion-debug"
+                "guided-diffusion-${config:runMode}"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-debug-container"
+                "build-image"
             ],
             "icon": {
                 "id": "vm-active",
@@ -41,16 +41,16 @@
             },
         },
         {
-            "label": "build-debug-container",
+            "label": "build-image",
             "detail": "",
             "command": "docker",
             "type": "process",
             "args": [
                 "build",
                 "--build-arg",
-                "RUN_MODE=debug",
+                "RUN_MODE=${config:runMode}",
                 "-t",
-                "guided-diffusion-debug",
+                "guided-diffusion-${config:runMode}",
                 "."
             ],
             "problemMatcher": "$msCompile",
@@ -87,42 +87,12 @@
                 "all",
                 "-m=32g",
                 "--shm-size=2g",
-                "guided-diffusion-production"
+                "guided-diffusion-${config:runMode}"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-production-container"
-            ],
-            "icon": {
-                "id": "vm-active",
-                "color": "terminal.ansiCyan"
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "shared",
-                "group": "debug"
-            },
-        },
-        {
-            "label": "build-production-container",
-            "detail": "",
-            "command": "docker",
-            "type": "process",
-            "args": [
-                "build",
-                "--build-arg",
-                "RUN_MODE=production",
-                "-t",
-                "guided-diffusion-production",
-                "."
-            ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "stop-containers"
+                "build-image"
             ],
             "icon": {
                 "id": "vm-active",
@@ -143,7 +113,7 @@
             "type": "shell",
             "args": [
                 "-c",
-                "docker stop $(docker ps -a -q)"
+                "docker stop $(docker ps -a -q) | xargs -r docker stop"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",

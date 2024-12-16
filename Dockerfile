@@ -47,10 +47,19 @@ COPY guided_diffusion guided_diffusion
  
 ARG RUN_MODE
 
+ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_head_channels 64 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
+
+ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
+
+
 RUN if [ "$RUN_MODE" = "production" ]; then \
-        echo "python3 scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 2000" > startcommand.sh; \
+        echo "python3 scripts/super_res_train.py $SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 2000" > startcommand.sh; \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $SR_MODEL_FLAGS" > startcommand.sh; \
+    elif [ "$RUN_MODE" = "classifier_production" ]; then \
+        echo "python3 scripts/super_res_classifier_train.py $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+    elif [ "$RUN_MODE" = "classifier_debug" ]; then \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_train.py $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     else \
         echo "Unknown RUN_MODE: $RUN_MODE"; \
         exit 1; \
