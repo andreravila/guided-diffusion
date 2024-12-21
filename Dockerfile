@@ -48,7 +48,7 @@ COPY guided_diffusion guided_diffusion
 ARG RUN_MODE
 
 # --lr_anneal_steps 200000 is the same as --iterations 200000 --anneal_lr True in the classifier_train_flags
-ENV TRAIN_FLAGS="--lr_anneal_steps 200000 --batch_size 128 --lr 1e-4 --save_interval 5000 --weight_decay 0.05"
+ENV TRAIN_FLAGS="--lr_anneal_steps 200000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
 ENV CLASSIFIER_TRAIN_FLAGS="--iterations 200000 --anneal_lr True --batch_size 128 --lr 1e-4 --save_interval 5000 --weight_decay 0.05"
 
@@ -58,13 +58,13 @@ ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --classifier_at
 
 # change the RUN_MODE at .vscode/settings.json
 RUN if [ "$RUN_MODE" = "production" ]; then \
-        echo "python3 scripts/super_res_train.py $SR_MODEL_FLAGS" > startcommand.sh; \
+        echo "python3 scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "debug" ]; then \
         echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "classifier-production" ]; then \
-        echo "python3 scripts/super_res_classifier_train.py $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+        echo "python3 scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "classifier-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     else \
         echo "Unknown RUN_MODE: $RUN_MODE"; \
         exit 1; \
