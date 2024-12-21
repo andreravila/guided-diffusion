@@ -671,7 +671,7 @@ class SuperResModel(UNetModel):
     """
 
     def __init__(self, image_size, in_channels, *args, **kwargs):
-        super().__init__(image_size, in_channels * 2, *args, **kwargs)
+        super().__init__(image_size, in_channels + 1, *args, **kwargs)
 
     def forward(self, x, timesteps, low_res=None, **kwargs):
         _, _, new_height, new_width = x.shape
@@ -902,7 +902,7 @@ class EncoderSuperResModel(EncoderUNetModel):
     """
 
     def __init__(self, image_size, in_channels, *args, **kwargs):
-        super().__init__(image_size, in_channels * 2, *args, **kwargs)
+        super().__init__(image_size, in_channels + 1, *args, **kwargs)
 
     def forward(self, x, timesteps, low_res=None, **kwargs):
         _, _, new_height, new_width = x.shape
