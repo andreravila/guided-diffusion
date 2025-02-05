@@ -458,7 +458,7 @@ def sr_create_model(
 
     return SuperResModel(
         image_size=large_size,
-        in_channels=1,
+        in_channels=2,
         model_channels=num_channels,
         out_channels=(1 if not learn_sigma else 2),
         num_res_blocks=num_res_blocks,

@@ -109,9 +109,9 @@ def load_superres_data(data_dir, batch_size, large_size, small_size, class_cond=
 
 def create_argparser():
     defaults = dict(
-        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/train/hr_128",
-        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/validate-6/hr_128",
-        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_npy/val-output",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy_144_b0/train/hr_128",
+        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_npy_144_b0/validate-6/hr_128",
+        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_npy_144_b0/val-output",
         just_validate = False,
         val_save_suffix = "png",
         val_num_samples=None,
@@ -121,10 +121,10 @@ def create_argparser():
         weight_decay=0.0,
         lr_anneal_steps=0,
         batch_size=128,
-        microbatch=12,
+        microbatch=4,
         ema_rate="0.9999",
-        log_interval=10,
-        save_interval=1000,
+        log_interval=25,
+        save_interval=5000,
         val_interval=500,
         resume_checkpoint="",
         use_fp16=False,
