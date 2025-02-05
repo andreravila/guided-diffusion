@@ -124,8 +124,8 @@ class ImageDataset(Dataset):
             
             # As this is not an image, cannot resize to lower sizes, just add
             # zero padding to the borders
-            arr = fill_borders_with_zero(numpy_array, self.resolution)
-            arr = (arr * 2) - 1
+            # arr = fill_borders_with_zero(numpy_array, self.resolution)
+            arr = (numpy_array * 2) - 1
         else:
             with bf.BlobFile(path, "rb") as f:
                 pil_image = Image.open(f)

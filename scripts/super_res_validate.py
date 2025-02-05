@@ -127,9 +127,9 @@ def create_argparser():
         num_samples=3,
         batch_size=3,
         use_ddim=False,
-        data_dir="./dataset-final/slices-dataset-png/train/hr_128",
-        model_path="./model000300.pt",
-        out_dir="./dataset-final/slices-dataset-png/output"
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy_144/validate/sr_16_128",
+        out_dir="./dataset3TSubsetSliced/sliced_dataset_npy_144/validation",
+        model_path="",
     )
     defaults.update(sr_model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

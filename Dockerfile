@@ -48,9 +48,9 @@ COPY guided_diffusion guided_diffusion
 ARG RUN_MODE
 
 # --lr_anneal_steps 200000 is the same as --iterations 200000 --anneal_lr True in the classifier_train_flags
-ENV TRAIN_FLAGS="--lr_anneal_steps 200000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
+ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
-ENV CLASSIFIER_TRAIN_FLAGS="--iterations 200000 --anneal_lr True --batch_size 128 --lr 1e-4 --save_interval 5000 --weight_decay 0.05"
+ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --lr 1e-4 --save_interval 5000 --weight_decay 0.05"
 
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_head_channels 64 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
 
