@@ -50,21 +50,36 @@ ARG RUN_MODE
 # --lr_anneal_steps 200000 is the same as --iterations 200000 --anneal_lr True in the classifier_train_flags
 ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
+ENV SAMPLE_FLAGS="--batch_size 4"
+
 ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --lr 1e-4 --save_interval 5000 --weight_decay 0.05"
+
+ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 12"
 
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_head_channels 64 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
 
 ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
 
 # change the RUN_MODE at .vscode/settings.json
-RUN if [ "$RUN_MODE" = "production" ]; then \
+RUN if [ "$RUN_MODE" = "train-production" ]; then \
         echo "python3 scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "classifier-production" ]; then \
+    elif [ "$RUN_MODE" = "train-debug" ]; then \
+    echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
+    # classifier
+    elif [ "$RUN_MODE" = "train-classifier-production" ]; then \
         echo "python3 scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "classifier-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+    elif [ "$RUN_MODE" = "train-classifier-debug" ]; then \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+    # sample
+    elif [ "$RUN_MODE" = "sample-production" ]; then \
+        echo "python3 scripts/super_res_sample.py $SAMPLE_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
+    elif [ "$RUN_MODE" = "sample-debug" ]; then \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_sample.py $SAMPLE_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
+    # sample classifier
+    elif [ "$RUN_MODE" = "sample-classifier-production" ]; then \
+        echo "python3 scripts/super_res_classifier_sample.py $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+    elif [ "$RUN_MODE" = "sample-classifier-debug" ]; then \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_sample.py $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     else \
         echo "Unknown RUN_MODE: $RUN_MODE"; \
         exit 1; \

@@ -6,7 +6,7 @@ dataset-final
 
 guided_diffusion.egg*
 
-test-models*
+checkpoint_model*
 
 sliced_dataset
 .venv

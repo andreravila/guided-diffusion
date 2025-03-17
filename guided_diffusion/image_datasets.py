@@ -18,7 +18,9 @@ def load_data(
     random_crop=False,
     random_flip=False,
     use_fp16=False,
-    num_samples=None
+    num_samples=None,
+    out_dir=None,
+    override_samples=True
 ):
     """
     For a dataset, create a generator over (images, kwargs) pairs.
@@ -41,6 +43,12 @@ def load_data(
     if not data_dir:
         raise ValueError("unspecified data directory")
     all_files = _list_image_files_recursively(data_dir, num_samples)
+    # Don't sample again the samples if they are already saved
+    if override_samples == False:
+        sampled_files = _list_image_files_recursively(out_dir, num_samples)
+        sampled_files = [bf.basename(path) for path in sampled_files]
+        all_files = [x for x in all_files if bf.basename(x) not in sampled_files]
+
     classes = None
     if class_cond:
         # Assume classes are the first part of the filename,

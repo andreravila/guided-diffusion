@@ -19,6 +19,9 @@ from guided_diffusion.script_util import (
     add_dict_to_argparser,
 )
 
+from guided_diffusion.image_datasets import load_data
+import time
+from PIL import Image
 
 def main():
     args = create_argparser().parse_args()
@@ -39,38 +42,85 @@ def main():
     model.eval()
 
     logger.log("loading data...")
-    data = load_data_for_worker(args.base_samples, args.batch_size, args.class_cond)
+    #data = load_data_for_worker(args.base_samples, args.batch_size, args.class_cond)
+
+    override_samples = False
+
+    data = load_data(
+        data_dir=args.data_dir,
+        batch_size=args.batch_size,
+        image_size=args.large_size,
+        class_cond=args.class_cond,
+        deterministic=True,
+        use_fp16=args.use_fp16,
+        num_samples=args.num_samples,
+        out_dir=args.out_dir,
+        override_samples=override_samples
+    )
+
+    logger.log(f"Output dir: {args.out_dir}")
+    os.makedirs(args.out_dir, exist_ok=True)
+
+    # As it is deterministic, we know the indexes of the samples loaded,
+    # because they are loaded in order
+    indexes = []
+
+    # Don't sample again the samples if they are already saved
+    if override_samples == False:
+        sampled_files = sorted(bf.listdir(args.out_dir))
+
+    for entry in sorted(bf.listdir(args.data_dir)):
+        if override_samples == True or entry not in sampled_files:
+            entry = entry.split("/")[-1].split(".")[0]
+            indexes.append(entry)
 
     logger.log("creating samples...")
-    all_images = []
-    while len(all_images) * args.batch_size < args.num_samples:
-        model_kwargs = next(data)
+
+    start_time = time.time()
+    i = 0
+    if args.num_samples is None:
+        args.num_samples = len(indexes)
+        
+    while i * args.batch_size < args.num_samples:
+        high_res, model_kwargs  = next(data)
         model_kwargs = {k: v.to(dist_util.dev()) for k, v in model_kwargs.items()}
-        sample = diffusion.p_sample_loop(
+        sample_batch= diffusion.p_sample_loop(
             model,
-            (args.batch_size, 3, args.large_size, args.large_size),
+            (args.batch_size, args.in_channels, args.large_size, args.large_size),
             clip_denoised=args.clip_denoised,
             model_kwargs=model_kwargs,
         )
-        sample = ((sample + 1) * 127.5).clamp(0, 255).to(th.uint8)
-        sample = sample.permute(0, 2, 3, 1)
-        sample = sample.contiguous()
+        if args.save_suffix == "npy":
+            sample_batch= ((sample_batch+ 1) / 2).clamp(0, 1).to(th.uint8)
+        else:
+            sample_batch= ((sample_batch+ 1) * 127.5).clamp(0, 255).to(th.uint8)
+        
+        sample_batch= sample_batch.permute(0, 2, 3, 1)
+        sample_batch= sample_batch.contiguous()
 
-        all_samples = [th.zeros_like(sample) for _ in range(dist.get_world_size())]
-        dist.all_gather(all_samples, sample)  # gather not supported with NCCL
-        for sample in all_samples:
-            all_images.append(sample.cpu().numpy())
-        logger.log(f"created {len(all_images) * args.batch_size} samples")
+        # Commented lines are for multi-gpu sampling
+        #all_sample_batches = [th.zeros_like(sample_batch) for _ in range(dist.get_world_size())]
+        #dist.all_gather(all_sample_batches, sample_batch)  # gather not supported with NCCL
 
-    arr = np.concatenate(all_images, axis=0)
-    arr = arr[: args.num_samples]
-    if dist.get_rank() == 0:
-        shape_str = "x".join([str(x) for x in arr.shape])
-        out_path = os.path.join(logger.get_dir(), f"samples_{shape_str}.npz")
-        logger.log(f"saving to {out_path}")
-        np.savez(out_path, arr)
+        #for sample_batch in all_sample_batches:
 
-    dist.barrier()
+        index_offset = i * args.batch_size  # Calculate the starting index for the current batch
+        sample_array = sample_batch.cpu().numpy()
+        for j in range(args.batch_size):
+            sample = sample_array[j]
+            sample = sample.squeeze()  # Remove extra dimension if needed
+            idx = indexes[index_offset + j]  # Get the corresponding index for the sample
+            path = os.path.join(args.out_dir, f"{idx}.{args.save_suffix}")
+            if args.save_suffix == "npy":
+                np.save(path, sample)
+            else:
+                Image.fromarray(sample).save(path)
+
+        i += 1
+        logger.log(f"saved {i * args.batch_size} samples")
+        logger.log(f"Time: {time.time() - start_time:.06}s")
+        start_time = time.time()
+
     logger.log("sampling complete")
 
 
@@ -103,11 +153,15 @@ def load_data_for_worker(base_samples, batch_size, class_cond):
 def create_argparser():
     defaults = dict(
         clip_denoised=True,
-        num_samples=10000,
+        num_samples=None,
+        save_suffix = "npy",
         batch_size=16,
         use_ddim=False,
-        base_samples="",
-        model_path="",
+        in_channels=1,
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/validate/hr_128",
+        out_dir="./dataset3TSubsetSliced/sliced_dataset_npy/estimated_samples",
+        use_fp16=False,
+        model_path="checkpoint_model/without_b0_05/model100000.pt",
     )
     defaults.update(sr_model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

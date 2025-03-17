@@ -2,7 +2,247 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "run-debug-container",
+            "label": "build-image-train-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=train-debug",
+                "-t",
+                "guided-diffusion-train-debug",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-debug"
+            },
+        },
+        {
+            "label": "build-image-train-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=train-production",
+                "-t",
+                "guided-diffusion-train-production",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-production"
+            },
+        },
+        {
+            "label": "build-image-train-classifier-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=train-classifier-debug",
+                "-t",
+                "guided-diffusion-train-classifier-debug",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-debug"
+            },
+        },
+        {
+            "label": "build-image-train-classifier-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=train-classifier-production",
+                "-t",
+                "guided-diffusion-train-classifier-production",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-production"
+            },
+        },
+        {
+            "label": "build-image-sample-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=sample-debug",
+                "-t",
+                "guided-diffusion-sample-debug",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-debug"
+            },
+        },
+        {
+            "label": "build-image-sample-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=sample-production",
+                "-t",
+                "guided-diffusion-sample-production",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-production"
+            },
+        },
+        {
+            "label": "build-image-sample-classifier-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=sample-classifier-debug",
+                "-t",
+                "guided-diffusion-sample-classifier-debug",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-debug"
+            },
+        },
+        {
+            "label": "build-image-sample-classifier-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=sample-classifier-production",
+                "-t",
+                "guided-diffusion-sample-classifier-production",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-production"
+            },
+        },
+        {
+            "label": "run-container-train-debug",
             "detail": "",
             "command": "docker",
             "type": "process",
@@ -21,12 +261,12 @@
                 "all",
                 "-m=32g",
                 "--shm-size=2g",
-                "guided-diffusion-${config:runMode}"
+                "guided-diffusion-train-debug"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image"
+                "build-image-train-debug"
             ],
             "icon": {
                 "id": "vm-active",
@@ -37,41 +277,11 @@
                 "reveal": "silent",
                 "focus": true,
                 "panel": "shared",
-                "group": "debug"
+                "group": "train-debug"
             },
         },
         {
-            "label": "build-image",
-            "detail": "",
-            "command": "docker",
-            "type": "process",
-            "args": [
-                "build",
-                "--build-arg",
-                "RUN_MODE=${config:runMode}",
-                "-t",
-                "guided-diffusion-${config:runMode}",
-                "."
-            ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "stop-containers"
-            ],
-            "icon": {
-                "id": "vm-active",
-                "color": "terminal.ansiCyan"
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "shared",
-                "group": "debug"
-            },
-        },
-        {
-            "label": "run-production-container",
+            "label": "run-container-train-production",
             "detail": "",
             "command": "docker",
             "type": "process",
@@ -87,12 +297,12 @@
                 "all",
                 "-m=32g",
                 "--shm-size=2g",
-                "guided-diffusion-${config:runMode}"
+                "guided-diffusion-train-production"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image"
+                "build-image-train-production"
             ],
             "icon": {
                 "id": "vm-active",
@@ -103,7 +313,232 @@
                 "reveal": "silent",
                 "focus": true,
                 "panel": "shared",
-                "group": "debug"
+                "group": "train-production"
+            },
+        },
+        {
+            "label": "run-container-train-classifier-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-p",
+                "6502:6502",
+                "-d",
+                "-v",
+                "./checkpoint_model:/home/test/checkpoint_model",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "guided-diffusion-train-classifier-debug"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-train-debug"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-debug"
+            },
+        },
+        {
+            "label": "run-container-train-classifier-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./checkpoint_model:/home/test/checkpoint_model",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "guided-diffusion-train-classifier-production"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-train-classifier-production"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-production"
+            },
+        },
+        {
+            "label": "run-container-sample-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-p",
+                "6502:6502",
+                "-d",
+                "-v",
+                "./checkpoint_model:/home/test/checkpoint_model",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "guided-diffusion-sample-debug"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-debug"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-debug"
+            },
+        },
+        {
+            "label": "run-container-sample-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./checkpoint_model:/home/test/checkpoint_model",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "guided-diffusion-sample-production"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-production"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-production"
+            },
+        },
+        {
+            "label": "run-container-sample-classifier-debug",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-p",
+                "6502:6502",
+                "-d",
+                "-v",
+                "./checkpoint_model:/home/test/checkpoint_model",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "guided-diffusion-sample-classifier-debug"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-classifier-debug"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-debug"
+            },
+        },
+        {
+            "label": "run-container-sample-classifier-production",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./checkpoint_model:/home/test/checkpoint_model",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "guided-diffusion-sample-classifier-production"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-classifier-production"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-production"
             },
         },
         {

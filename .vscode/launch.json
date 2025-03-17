@@ -20,7 +20,7 @@
             ]
         },
         {
-            "name": "Python Debug",
+            "name": "Python Train Debug",
             "type": "debugpy",
             "request": "attach",
             "justMyCode": false,
@@ -34,15 +34,15 @@
                 "remoteRoot": "/home/test"
                 }
             ],
-            "preLaunchTask": "run-debug-container"
+            "preLaunchTask": "run-container-train-debug"
         },
         {
-            "name": "Python Production",
+            "name": "Python Train Classifier Debug",
             "type": "debugpy",
             "request": "attach",
             "justMyCode": false,
             "connect": {
-                "host": "6502",
+                "host": "localhost",
                 "port": "6502"
             },
             "pathMappings": [
@@ -51,7 +51,41 @@
                 "remoteRoot": "/home/test"
                 }
             ],
-            "preLaunchTask": "run-production-container"
-        }
+            "preLaunchTask": "run-container-train-classifier-debug"
+        },
+        {
+            "name": "Python Sample Debug",
+            "type": "debugpy",
+            "request": "attach",
+            "justMyCode": false,
+            "connect": {
+                "host": "localhost",
+                "port": "6502"
+            },
+            "pathMappings": [
+                {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/home/test"
+                }
+            ],
+            "preLaunchTask": "run-container-sample-debug"
+        },
+        {
+            "name": "Python Sample Classifier Debug",
+            "type": "debugpy",
+            "request": "attach",
+            "justMyCode": false,
+            "connect": {
+                "host": "localhost",
+                "port": "6502"
+            },
+            "pathMappings": [
+                {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/home/test"
+                }
+            ],
+            "preLaunchTask": "run-container-sample-classifier-debug"
+        },
     ]
 }
