@@ -341,7 +341,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image-train-debug"
+                "build-image-train-classifier-debug"
             ],
             "icon": {
                 "id": "vm-active",
