@@ -5,7 +5,9 @@ from . import gaussian_diffusion as gd
 from .respace import SpacedDiffusion, space_timesteps
 from .unet import EncoderSuperResModel, SuperResModel, UNetModel, EncoderUNetModel
 
-NUM_CLASSES = 1000
+# Update here to change the number of classes of the classifier.
+# 72 is the number of classes of my dataset, which is the number of estimated diffusion gradient directions
+NUM_CLASSES = 72
 
 
 def diffusion_defaults():
@@ -344,8 +346,10 @@ def sr_create_classifier(
         image_size=image_size,
         # Update here to change input channels
         in_channels=1,
+        # Choose to add or not the low res input
+        add_low_res_input=False,
         model_channels=classifier_width,
-        out_channels=1000,
+        out_channels=NUM_CLASSES,
         num_res_blocks=classifier_depth,
         attention_resolutions=tuple(attention_ds),
         channel_mult=channel_mult,

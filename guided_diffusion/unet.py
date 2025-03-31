@@ -671,6 +671,9 @@ class SuperResModel(UNetModel):
     """
 
     def __init__(self, image_size, in_channels, *args, **kwargs):
+        # In my case, the output channel is always 1,
+        # so the number of input channels of the UNet will be in_channels (the number of channels of the low res input)
+        # + 1 (the output of the previous timestep) if I do.
         super().__init__(image_size, in_channels + 1, *args, **kwargs)
 
     def forward(self, x, timesteps, low_res=None, **kwargs):
@@ -901,11 +904,21 @@ class EncoderSuperResModel(EncoderUNetModel):
     Expects an extra kwarg `low_res` to condition on a low-resolution image.
     """
 
-    def __init__(self, image_size, in_channels, *args, **kwargs):
-        super().__init__(image_size, in_channels + 1, *args, **kwargs)
+    def __init__(self, image_size, in_channels, add_low_res_input, *args, **kwargs):
+        # In my case, the output channel is always 1,
+        # so the number of input channels of the UNet will be in_channels (the number of channels of the low res input)
+        # + 1 (the output of the previous timestep) if I add the low_res input in the UNet,
+        # and 1 (just the output of the previous timestep) if I don't add the low res input. 
+        if add_low_res_input:
+            in_channels = in_channels + 1
+        else:
+            in_channels = 1
+        super().__init__(image_size, in_channels, *args, **kwargs)
+        self.add_low_res_input = add_low_res_input
 
     def forward(self, x, timesteps, low_res=None, **kwargs):
-        _, _, new_height, new_width = x.shape
-        upsampled = F.interpolate(low_res, (new_height, new_width), mode="bilinear")
-        x = th.cat([x, upsampled], dim=1)
+        if self.add_low_res_input:
+            _, _, new_height, new_width = x.shape
+            upsampled = F.interpolate(low_res, (new_height, new_width), mode="bilinear")
+            x = th.cat([x, upsampled], dim=1)
         return super().forward(x, timesteps, **kwargs)
