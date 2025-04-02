@@ -357,7 +357,7 @@ def sr_create_classifier(
         # Update here to change input channels
         in_channels=1,
         # Choose to add or not the low res input
-        add_low_res_input=False,
+        add_low_res_input=True,
         model_channels=classifier_width,
         out_channels=NUM_CLASSES,
         num_res_blocks=classifier_depth,
