@@ -86,7 +86,7 @@ def main():
         model_kwargs = {k: v.to(dist_util.dev()) for k, v in model_kwargs.items()}
 
         in_channels = model_kwargs["low_res"].shape[1]
-        
+
         sample_batch= diffusion.p_sample_loop(
             model,
             (args.batch_size, in_channels, args.large_size, args.large_size),
@@ -164,7 +164,7 @@ def create_argparser():
         # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
         data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test/hr_128",
         out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/estimated_samples",
-        model_path="checkpoint_model/without_b0_05/model100000.pt",
+        model_path="checkpoint_model/checkpoint_dki_mppca_144_05/model/model100000.pt",
     )
     defaults.update(sr_model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

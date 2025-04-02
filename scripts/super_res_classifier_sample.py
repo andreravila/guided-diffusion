@@ -172,8 +172,8 @@ def create_argparser():
         # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
         data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test/hr_128",
         out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/estimated_samples_classifier",
-        model_path="checkpoint_model/without_b0_05/model100000.pt",
-        classifier_path="checkpoint_model/classifier_without_b0_05/model040000.pt",
+        model_path="checkpoint_model/checkpoint_dki_mppca_144_05/model/model100000.pt",
+        classifier_path="checkpoint_model/checkpoint_dki_mppca_144_05/classifier/model040000.pt",
         classifier_scale=1.0,
     )
     defaults.update(sr_model_and_diffusion_defaults())

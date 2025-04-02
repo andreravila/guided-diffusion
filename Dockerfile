@@ -38,16 +38,15 @@ RUN . .venv/bin/activate && \
 COPY scripts scripts
 COPY guided_diffusion guided_diffusion
 
-# copy the dataset
-# COPY dataset3TSubsetSliced dataset3TSubsetSliced
+# copy the test part of the dataset, to run the container directly
+# COPY dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test
 
-#ENV startcommand='python3 scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 1000'
+# copy the checkpoints
+# COPY checkpoint_model/checkpoint_dki_mppca_144_05 checkpoint_model/checkpoint_dki_mppca_144_05
 
-#ENV startcommand='python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py --large_size 128 --small_size 128 --diffusion_steps 1000'
- 
 ARG RUN_MODE
 
-# --lr_anneal_steps 200000 is the same as --iterations 200000 --anneal_lr True in the classifier_train_flags
+
 ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
 ENV SAMPLE_FLAGS="--batch_size 4"
@@ -56,7 +55,8 @@ ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 12
 
 ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 4"
 
-ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_head_channels 64 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
+# Acording to what was tested in the paper, can also be, instead of --num_channels 192, --num_channels 256
+ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_heads 4 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
 
 ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
 
@@ -94,5 +94,3 @@ CMD . .venv/bin/activate && ./startcommand.sh
 # docker build --build-arg RUN_MODE=production -t guided-diffusion .
 #  docker run -v ./checkpoint_model:/home/test/checkpoint_model -v ./tmp:/tmp -v ./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced --gpus all -m=32g  --shm-size=2g guided-diffusion-production
 # consult vscode tasks.json
-
-# TODO: Move the debug to here also
