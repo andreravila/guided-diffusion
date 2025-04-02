@@ -7,7 +7,7 @@ from .unet import EncoderSuperResModel, SuperResModel, UNetModel, EncoderUNetMod
 
 # Update here to change the number of classes of the classifier.
 # 72 is the number of classes of my dataset, which is the number of estimated diffusion gradient directions
-NUM_CLASSES = 72
+NUM_CLASSES = 1000
 
 
 def diffusion_defaults():
@@ -270,6 +270,12 @@ def create_classifier(
 def sr_classifier_and_diffusion_defaults():
     res = classifier_defaults()
     res.update(diffusion_defaults())
+    res["large_size"] = 256
+    res["small_size"] = 64
+    return res
+
+def sr_classifier_defaults():
+    res = classifier_defaults()
     res["large_size"] = 256
     res["small_size"] = 64
     return res

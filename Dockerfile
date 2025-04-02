@@ -77,9 +77,9 @@ RUN if [ "$RUN_MODE" = "train-production" ]; then \
         echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_sample.py $SAMPLE_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
     # sample classifier
     elif [ "$RUN_MODE" = "sample-classifier-production" ]; then \
-        echo "python3 scripts/super_res_classifier_sample.py $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+        echo "python3 scripts/super_res_classifier_sample.py $SR_MODEL_FLAGS $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "sample-classifier-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_sample.py $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_sample.py $SR_MODEL_FLAGS $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     else \
         echo "Unknown RUN_MODE: $RUN_MODE"; \
         exit 1; \
