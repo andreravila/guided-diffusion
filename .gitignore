@@ -13,3 +13,5 @@ test-models*
 sliced_dataset*
 
 tmp
+
+checkpoint_model
