@@ -676,11 +676,13 @@ class SuperResModel(UNetModel):
         # + 1 (the output of the previous timestep) if I do.
         super().__init__(image_size, in_channels + 1, *args, **kwargs)
 
-    def forward(self, x, timesteps, low_res=None, **kwargs):
+    # y may be formally added as parameter or not, because he is able to get the y value from kwargs["y"], generating the same result
+    # adding it here just to comply with super_res_classifier_sample.py
+    def forward(self, x, timesteps, low_res=None, y=None, **kwargs):
         _, _, new_height, new_width = x.shape
         upsampled = F.interpolate(low_res, (new_height, new_width), mode="bilinear")
         x = th.cat([x, upsampled], dim=1)
-        return super().forward(x, timesteps, **kwargs)
+        return super().forward(x, timesteps, y, **kwargs)
 
 
 class EncoderUNetModel(nn.Module):

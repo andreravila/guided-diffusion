@@ -56,18 +56,18 @@ def main():
         classifier.convert_to_fp16()
     classifier.eval()
 
-    def cond_fn(x, t, y=None):
+    def cond_fn(x, t, low_res, y=None):
         assert y is not None
         with th.enable_grad():
             x_in = x.detach().requires_grad_(True)
-            logits = classifier(x_in, t)
+            logits = classifier(x_in, t, low_res)
             log_probs = F.log_softmax(logits, dim=-1)
             selected = log_probs[range(len(logits)), y.view(-1)]
             return th.autograd.grad(selected.sum(), x_in)[0] * args.classifier_scale
 
-    def model_fn(x, t, y=None):
+    def model_fn(x, t, low_res, y=None):
         assert y is not None
-        return model(x, t, y if args.class_cond else None)
+        return model(x, t, low_res, y if args.class_cond else None)
     
     
     logger.log("loading data...")
@@ -118,7 +118,7 @@ def main():
         )
         sample_batch = sample_fn(
             model_fn,
-            (args.batch_size, 1, args.image_size, args.image_size),
+            (args.batch_size, 1, args.large_size, args.large_size),
             clip_denoised=args.clip_denoised,
             model_kwargs=model_kwargs,
             cond_fn=cond_fn,
@@ -161,11 +161,14 @@ def main():
 def create_argparser():
     defaults = dict(
         clip_denoised=True,
-        num_samples=10000,
+        num_samples=None,
         batch_size=16,
         use_ddim=False,
-        model_path="",
-        classifier_path="",
+        save_suffix="png",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/test/sr_16_128",
+        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/estimated_samples_classifier",
+        model_path="checkpoint_model/without_b0_05/model100000.pt",
+        classifier_path="checkpoint_model/classifier_without_b0_05/model040000.pt",
         classifier_scale=1.0,
     )
     defaults.update(sr_model_and_diffusion_defaults())

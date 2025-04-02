@@ -301,7 +301,9 @@ def sr_create_classifier_and_diffusion(
     rescale_learned_sigmas,
 ):
     classifier = sr_create_classifier(
+        image_size,
         large_size,
+        small_size,
         classifier_use_fp16,
         classifier_width,
         classifier_depth,
@@ -325,6 +327,8 @@ def sr_create_classifier_and_diffusion(
 
 def sr_create_classifier(
     image_size,
+    large_size,
+    small_size,
     classifier_use_fp16,
     classifier_width,
     classifier_depth,
@@ -333,23 +337,23 @@ def sr_create_classifier(
     classifier_resblock_updown,
     classifier_pool,
 ):
-    if image_size == 512:
+    if large_size == 512:
         channel_mult = (0.5, 1, 1, 2, 2, 4, 4)
-    elif image_size == 256:
+    elif large_size == 256:
         channel_mult = (1, 1, 2, 2, 4, 4)
-    elif image_size == 128:
+    elif large_size == 128:
         channel_mult = (1, 1, 2, 3, 4)
-    elif image_size == 64:
+    elif large_size == 64:
         channel_mult = (1, 2, 3, 4)
     else:
-        raise ValueError(f"unsupported image size: {image_size}")
+        raise ValueError(f"unsupported image size: {large_size}")
 
     attention_ds = []
     for res in classifier_attention_resolutions.split(","):
-        attention_ds.append(image_size // int(res))
+        attention_ds.append(large_size // int(res))
 
     return EncoderSuperResModel(
-        image_size=image_size,
+        image_size=large_size,
         # Update here to change input channels
         in_channels=1,
         # Choose to add or not the low res input
