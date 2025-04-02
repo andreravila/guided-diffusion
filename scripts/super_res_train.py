@@ -109,6 +109,7 @@ def load_superres_data(data_dir, batch_size, large_size, small_size, class_cond=
 
 def create_argparser():
     defaults = dict(
+        # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
         data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/train/hr_128",
         val_data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/validate-4/hr_128",
         val_out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/val-output",

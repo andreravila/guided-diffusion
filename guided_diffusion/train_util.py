@@ -306,7 +306,7 @@ class TrainLoop:
 
             sample = self.diffusion.p_sample_loop(
                 self.model,
-                (batch_size, 1, self.image_size, self.image_size),
+                (batch_size, model_kwargs['low_res'].shape[1], self.image_size, self.image_size),
                 clip_denoised=self.clip_denoised,
                 model_kwargs=model_kwargs,
             )

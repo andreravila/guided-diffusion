@@ -206,9 +206,10 @@ def split_microbatches(microbatch, *args):
 
 def create_argparser():
     defaults = dict(
-        data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/train/hr_128",
-        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_npy/validate-6/hr_128",
-        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_npy/val-output",
+        # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/train/hr_128",
+        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/validate-4/hr_128",
+        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/val-output",
         just_validate = False,
         val_save_suffix = "png",
         val_num_samples=None,
@@ -224,7 +225,7 @@ def create_argparser():
         log_interval=10,
         eval_interval=5,
         save_interval=10000,
-        use_fp16=False,
+        use_fp16=True,
         fp16_scale_growth=1e-3
     )
     defaults.update(sr_classifier_and_diffusion_defaults())

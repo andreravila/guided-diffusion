@@ -116,9 +116,12 @@ def main():
         sample_fn = (
             diffusion.p_sample_loop if not args.use_ddim else diffusion.ddim_sample_loop
         )
+
+        in_channels = model_kwargs["low_res"].shape[1]
+
         sample_batch = sample_fn(
             model_fn,
-            (args.batch_size, 1, args.large_size, args.large_size),
+            (args.batch_size, in_channels, args.large_size, args.large_size),
             clip_denoised=args.clip_denoised,
             model_kwargs=model_kwargs,
             cond_fn=cond_fn,
@@ -164,9 +167,11 @@ def create_argparser():
         num_samples=None,
         batch_size=16,
         use_ddim=False,
-        save_suffix="png",
-        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/test/sr_16_128",
-        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/estimated_samples_classifier",
+        use_fp16=True,
+        save_suffix="npy",
+        # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test/hr_128",
+        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/estimated_samples_classifier",
         model_path="checkpoint_model/without_b0_05/model100000.pt",
         classifier_path="checkpoint_model/classifier_without_b0_05/model040000.pt",
         classifier_scale=1.0,
