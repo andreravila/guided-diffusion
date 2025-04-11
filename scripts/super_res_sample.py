@@ -84,10 +84,11 @@ def main():
     while i * args.batch_size < args.num_samples:
         high_res, model_kwargs  = next(data)
         model_kwargs = {k: v.to(dist_util.dev()) for k, v in model_kwargs.items()}
-
         in_channels = model_kwargs["low_res"].shape[1]
-
-        sample_batch= diffusion.p_sample_loop(
+        sample_fn = (
+            diffusion.p_sample_loop if not args.use_ddim else diffusion.ddim_sample_loop
+        )
+        sample_batch= sample_fn(
             model,
             (args.batch_size, in_channels, args.large_size, args.large_size),
             clip_denoised=args.clip_denoised,

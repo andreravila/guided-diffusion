@@ -50,6 +50,8 @@ ARG RUN_MODE
 ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
 ENV SAMPLE_FLAGS="--batch_size 4"
+# using ddim
+# ENV SAMPLE_FLAGS="--batch_size 4 --timestep_respacing ddim100 --use_ddim True"
 
 ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
