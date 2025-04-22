@@ -128,9 +128,9 @@ def main():
             device=dist_util.dev(),
         )
         if args.save_suffix == "npy":
-            sample_batch= ((sample_batch + 1) / 2).clamp(0, 1).to(th.uint8)
+            sample_batch = ((sample_batch + 1) / 2).clamp(0, 1)
         else:
-            sample_batch= ((sample_batch + 1) * 127.5).clamp(0, 255).to(th.uint8)
+            sample_batch = ((sample_batch + 1) * 127.5).clamp(0, 255).to(th.uint8)
         
         sample_batch= sample_batch.permute(0, 2, 3, 1)
         sample_batch= sample_batch.contiguous()
