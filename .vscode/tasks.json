@@ -694,7 +694,7 @@
             "args": [
                 "run",
                 "-v",
-                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "samples-volume:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
                 "--gpus",
                 "all",
                 "-m=32g",
@@ -704,7 +704,8 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image-sample-production-with-dataset-and-model"
+                "build-image-sample-production-with-dataset-and-model",
+                "docker-volume-create-samples-volume"
             ],
             "icon": {
                 "id": "vm-active",
@@ -726,7 +727,7 @@
             "args": [
                 "run",
                 "-v",
-                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "samples-volume:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
                 "--gpus",
                 "all",
                 "-m=32g",
@@ -736,7 +737,8 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image-sample-classifier-production-with-dataset-and-model"
+                "build-image-sample-classifier-production-with-dataset-and-model",
+                "docker-volume-create-samples-volume"
             ],
             "icon": {
                 "id": "vm-active",
@@ -750,5 +752,57 @@
                 "group": "sample-classifier-production"
             },
         },
+        {
+            "label": "docker-volume-create-samples-volume",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "volume",
+                "create",
+                "samples-volume"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "volume-create"
+            },
+        },
+        {
+            "label": "copy-samples-volume-to-host",
+            "detail": "",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+              "-c",
+              "sudo cp -a \"$(docker volume inspect samples-volume --format \"{{ .Mountpoint }}\")/.\" ./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}"
+            ],
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "docker-volume-create-samples-volume"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+              "echo": true,
+              "reveal": "silent",
+              "focus": true,
+              "panel": "shared",
+              "group": "volume-create"
+            }
+          }
     ]
 }
