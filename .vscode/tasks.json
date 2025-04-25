@@ -566,6 +566,189 @@
                 "group": "debug"
             },
         },
-
+        {
+            "label": "build-image-sample-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=sample-production",
+                "--build-arg",
+                "DATASET_FOLDER=${config:datasetFolder}",
+                "--build-arg",
+                "ESTIMATED_SAMPLES_FOLDER=${config:estimatedSamplesFolder}",
+                "-t",
+                "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-production"
+            },
+        },
+        {
+            "label": "build-image-sample-classifier-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=sample-classifier-production",
+                "--build-arg",
+                "DATASET_FOLDER=${config:datasetFolder}",
+                "--build-arg",
+                "ESTIMATED_SAMPLES_FOLDER=${config:estimatedSamplesFolder}",
+                "-t",
+                "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-production"
+            },
+        },
+        {
+            "label": "push-image-sample-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "push",
+                "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-production"
+            },
+        },
+        {
+            "label": "push-image-sample-classifier-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "push",
+                "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-classifier-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-production"
+            },
+        },
+        {
+            "label": "run-image-sample-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-production"
+            },
+        },
+        {
+            "label": "run-image-sample-classifier-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-classifier-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "sample-classifier-production"
+            },
+        },
     ]
 }

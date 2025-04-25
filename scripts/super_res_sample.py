@@ -163,9 +163,9 @@ def create_argparser():
         use_ddim=False,
         use_fp16=True,
         # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
-        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test/hr_128",
-        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/estimated_samples",
-        model_path="checkpoint_model/checkpoint_dki_mppca_144_05/model/model100000.pt",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test_1/hr_128",
+        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/estimated_samples_1_ddim100",
+        model_path="checkpoint_model/sliced_dataset_dki_mppca_144_05/model/model100000.pt",
     )
     defaults.update(sr_model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

@@ -6,8 +6,6 @@ dataset-final
 
 guided_diffusion.egg*
 
-checkpoint_model*
-
 sliced_dataset
 .venv
 
