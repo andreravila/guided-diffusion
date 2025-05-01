@@ -577,8 +577,6 @@
                 "RUN_MODE=sample-production",
                 "--build-arg",
                 "DATASET_FOLDER=${config:datasetFolder}",
-                "--build-arg",
-                "ESTIMATED_SAMPLES_FOLDER=${config:estimatedSamplesFolder}",
                 "-t",
                 "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}",
                 "."
@@ -611,8 +609,6 @@
                 "RUN_MODE=sample-classifier-production",
                 "--build-arg",
                 "DATASET_FOLDER=${config:datasetFolder}",
-                "--build-arg",
-                "ESTIMATED_SAMPLES_FOLDER=${config:estimatedSamplesFolder}",
                 "-t",
                 "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}",
                 "."
@@ -694,7 +690,7 @@
             "args": [
                 "run",
                 "-v",
-                "samples-volume:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
                 "--gpus",
                 "all",
                 "-m=32g",
@@ -704,8 +700,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image-sample-production-with-dataset-and-model",
-                "docker-volume-create-samples-volume"
+                "build-image-sample-production-with-dataset-and-model"
             ],
             "icon": {
                 "id": "vm-active",
@@ -727,7 +722,7 @@
             "args": [
                 "run",
                 "-v",
-                "samples-volume:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
                 "--gpus",
                 "all",
                 "-m=32g",
@@ -737,8 +732,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image-sample-classifier-production-with-dataset-and-model",
-                "docker-volume-create-samples-volume"
+                "build-image-sample-classifier-production-with-dataset-and-model"
             ],
             "icon": {
                 "id": "vm-active",
@@ -751,58 +745,6 @@
                 "panel": "shared",
                 "group": "sample-classifier-production"
             },
-        },
-        {
-            "label": "docker-volume-create-samples-volume",
-            "detail": "",
-            "command": "docker",
-            "type": "process",
-            "args": [
-                "volume",
-                "create",
-                "samples-volume"
-            ],
-            "problemMatcher": "$msCompile",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-            ],
-            "icon": {
-                "id": "vm-active",
-                "color": "terminal.ansiCyan"
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": true,
-                "panel": "shared",
-                "group": "volume-create"
-            },
-        },
-        {
-            "label": "copy-samples-volume-to-host",
-            "detail": "",
-            "type": "shell",
-            "command": "bash",
-            "args": [
-              "-c",
-              "sudo cp -a \"$(docker volume inspect samples-volume --format \"{{ .Mountpoint }}\")/.\" ./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}"
-            ],
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "docker-volume-create-samples-volume"
-            ],
-            "icon": {
-                "id": "vm-active",
-                "color": "terminal.ansiCyan"
-            },
-            "presentation": {
-              "echo": true,
-              "reveal": "silent",
-              "focus": true,
-              "panel": "shared",
-              "group": "volume-create"
-            }
-          }
+        }
     ]
 }

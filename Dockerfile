@@ -46,10 +46,6 @@ COPY checkpoint_model/${DATASET_FOLDER}/model checkpoint_model/${DATASET_FOLDER}
 # copy the test part of the dataset, to run the container directly
 COPY dataset3TSubsetSliced/${DATASET_FOLDER}/test_1 dataset3TSubsetSliced/${DATASET_FOLDER}/test_1
 
-ARG ESTIMATED_SAMPLES_FOLDER
-# copy the estimated samples of the dataset, to run the container directly
-COPY dataset3TSubsetSliced/${DATASET_FOLDER}/${ESTIMATED_SAMPLES_FOLDER} dataset3TSubsetSliced/${DATASET_FOLDER}/${ESTIMATED_SAMPLES_FOLDER}
-
 # copy the rest of the application
 COPY scripts scripts
 COPY guided_diffusion guided_diffusion
@@ -59,9 +55,9 @@ ARG RUN_MODE
 
 ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
-#ENV SAMPLE_FLAGS="--batch_size 4"
+# ENV SAMPLE_FLAGS="--batch_size 4"
 # using ddim
-ENV SAMPLE_FLAGS="--batch_size 4 --timestep_respacing ddim100 --use_ddim True"
+ENV SAMPLE_FLAGS="--batch_size 12 --timestep_respacing ddim500 --use_ddim True"
 
 ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
 
