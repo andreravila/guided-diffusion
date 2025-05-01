@@ -1,6 +1,5 @@
 {
     // debug, production, classifier-debug, classifier-production
-    "runMode": "production",
-    "datasetFolder": "sliced_dataset_dki_mppca_144_05",
-    "estimatedSamplesFolder": "estimated_samples_1_ddim100"
+    "datasetFolder": "sliced_dataset_dki_mppca_144_05_b0",
+    "estimatedSamplesFolder": "estimated_samples_1_ddim1000"
 }
