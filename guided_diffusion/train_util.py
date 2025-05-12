@@ -187,7 +187,13 @@ class TrainLoop:
                 if os.environ.get("DIFFUSION_TRAINING_TEST", "") and self.step > 0:
                     return
             if self.step % self.val_interval == 0:
-                self.validate()    
+                # self.validate() 
+                with th.no_grad():
+                    with self.model.no_sync():
+                        self.model.eval()
+                        val_batch, val_cond = next(self.val_data)
+                        self.forward_backward(val_batch, val_cond, prefix="val")
+                        self.model.train()
             
             self.step += 1
         # Save the last checkpoint if it wasn't already saved.
@@ -202,7 +208,7 @@ class TrainLoop:
         self._anneal_lr()
         self.log_step()
 
-    def forward_backward(self, batch, cond):
+    def forward_backward(self, batch, cond, prefix="train"):
         self.mp_trainer.zero_grad()
         for i in range(0, batch.shape[0], self.microbatch):
             micro = batch[i : i + self.microbatch].to(dist_util.dev())
@@ -234,9 +240,10 @@ class TrainLoop:
 
             loss = (losses["loss"] * weights).mean()
             log_loss_dict(
-                self.diffusion, t, {k: v * weights for k, v in losses.items()}
+                self.diffusion, t, {f"{prefix}_{k}": v * weights for k, v in losses.items()}
             )
-            self.mp_trainer.backward(loss)
+            if loss.requires_grad:
+                self.mp_trainer.backward(loss)
 
     def _update_ema(self):
         for rate, params in zip(self.ema_rate, self.ema_params):
