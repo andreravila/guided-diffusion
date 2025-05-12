@@ -548,7 +548,7 @@
             "type": "shell",
             "args": [
                 "-c",
-                "docker stop $(docker ps -a -q) | xargs -r docker stop"
+                "docker ps -q | xargs -r docker stop"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
