@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VOL_NAME="samples-volume"
-HOST_DIR="dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_b0/estimated_samples_1_ddim500"
-IMAGE="andreriescoa/guided-diffusion-sample-production:sliced_dataset_dki_mppca_144_05_b0"
+DATASET_FOLDER="sliced_dataset_dki_mppca_144_05"
+ESTIMATED_SAMPLES_FOLDER="estimated_samples_1_classifier_10_low_res"
+HOST_DIR="dataset3TSubsetSliced/$DATASET_FOLDER/$ESTIMATED_SAMPLES_FOLDER"
+IMAGE="andreriescoa/guided-diffusion-sample-classifier-production:$DATASET_FOLDER"
 
 PORT=40088
 
@@ -11,7 +12,7 @@ TARGET_IP=114.32.64.6
 
 # ssh -p $PORT root@$TARGET_IP -L 8080:localhost:8080
 ssh -p "$PORT" root@"$TARGET_IP" " \
-docker stop $(docker ps -a -q) \
+docker ps -q | xargs -r docker stop \
 "
 
 ssh -p $PORT root@$TARGET_IP "mkdir -p /root/pesquisa/$HOST_DIR"
@@ -20,6 +21,7 @@ ssh -p $PORT root@$TARGET_IP "mkdir -p /root/pesquisa/$HOST_DIR"
 if [ -d "$HOST_DIR" ]; then
   rsync -avzP -e "ssh -p $PORT" \
     --ignore-existing \
+    --append-verify \
     "$HOST_DIR"/ \
     root@$TARGET_IP:/root/pesquisa/"$HOST_DIR"/
 fi
@@ -41,5 +43,6 @@ mkdir -p ./"$HOST_DIR"
 
 rsync -avzP -e "ssh -p $PORT" \
   --ignore-existing \
+  --append-verify \
   root@$TARGET_IP:/root/pesquisa/"$HOST_DIR"/ \
   ./"$HOST_DIR"/ 
