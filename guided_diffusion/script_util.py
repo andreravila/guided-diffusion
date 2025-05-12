@@ -39,6 +39,7 @@ def classifier_defaults():
         classifier_use_scale_shift_norm=True,  # False
         classifier_resblock_updown=True,  # False
         classifier_pool="attention",
+        dropout=0.0,
     )
 
 
@@ -203,6 +204,7 @@ def create_classifier_and_diffusion(
     predict_xstart,
     rescale_timesteps,
     rescale_learned_sigmas,
+    dropout=0.0,
 ):
     classifier = create_classifier(
         image_size,
@@ -213,6 +215,7 @@ def create_classifier_and_diffusion(
         classifier_use_scale_shift_norm,
         classifier_resblock_updown,
         classifier_pool,
+        dropout=dropout,
     )
     diffusion = create_gaussian_diffusion(
         steps=diffusion_steps,
@@ -236,6 +239,7 @@ def create_classifier(
     classifier_use_scale_shift_norm,
     classifier_resblock_updown,
     classifier_pool,
+    dropout=0.0,
 ):
     if image_size == 512:
         channel_mult = (0.5, 1, 1, 2, 2, 4, 4)
@@ -265,6 +269,7 @@ def create_classifier(
         use_scale_shift_norm=classifier_use_scale_shift_norm,
         resblock_updown=classifier_resblock_updown,
         pool=classifier_pool,
+        dropout=dropout,
     )
 
 def sr_classifier_and_diffusion_defaults():
@@ -299,6 +304,7 @@ def sr_create_classifier_and_diffusion(
     predict_xstart,
     rescale_timesteps,
     rescale_learned_sigmas,
+    dropout,
 ):
     classifier = sr_create_classifier(
         image_size,
@@ -311,6 +317,7 @@ def sr_create_classifier_and_diffusion(
         classifier_use_scale_shift_norm,
         classifier_resblock_updown,
         classifier_pool,
+        dropout=dropout,
     )
     diffusion = create_gaussian_diffusion(
         steps=diffusion_steps,
@@ -336,6 +343,7 @@ def sr_create_classifier(
     classifier_use_scale_shift_norm,
     classifier_resblock_updown,
     classifier_pool,
+    dropout=0.0,
 ):
     if large_size == 512:
         channel_mult = (0.5, 1, 1, 2, 2, 4, 4)
@@ -368,6 +376,7 @@ def sr_create_classifier(
         use_scale_shift_norm=classifier_use_scale_shift_norm,
         resblock_updown=classifier_resblock_updown,
         pool=classifier_pool,
+        dropout=dropout,
     )
 
 

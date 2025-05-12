@@ -67,7 +67,7 @@ ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 12"
 # Acording to what was tested in the paper, can also be, instead of --num_channels 192, --num_channels 256
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_heads 4 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
 
-ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
+ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True --dropout 0.1"
 
 # change the RUN_MODE at .vscode/settings.json
 RUN if [ "$RUN_MODE" = "train-production" ]; then \
