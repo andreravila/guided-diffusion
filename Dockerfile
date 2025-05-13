@@ -41,11 +41,11 @@ RUN . .venv/bin/activate && \
 
 ARG DATASET_FOLDER
 # copy the checkpoints
-COPY checkpoint_model/${DATASET_FOLDER}/model checkpoint_model/${DATASET_FOLDER}/model
-COPY checkpoint_model/${DATASET_FOLDER}/classifier/low_res checkpoint_model/${DATASET_FOLDER}/classifier/low_res
+#COPY checkpoint_model/${DATASET_FOLDER}/model checkpoint_model/${DATASET_FOLDER}/model
+#COPY checkpoint_model/${DATASET_FOLDER}/classifier/low_res checkpoint_model/${DATASET_FOLDER}/classifier/low_res
 
 # copy the test part of the dataset, to run the container directly
-COPY dataset3TSubsetSliced/${DATASET_FOLDER}/test_1 dataset3TSubsetSliced/${DATASET_FOLDER}/test_1
+#COPY dataset3TSubsetSliced/${DATASET_FOLDER}/test_1 dataset3TSubsetSliced/${DATASET_FOLDER}/test_1
 
 # copy the rest of the application
 COPY scripts scripts
@@ -54,20 +54,20 @@ COPY guided_diffusion guided_diffusion
 
 ARG RUN_MODE
 
-ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
+ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.0"
 
 # ENV SAMPLE_FLAGS="--batch_size 4"
 # using ddim
 ENV SAMPLE_FLAGS="--batch_size 12 --timestep_respacing ddim500 --use_ddim True"
 
-ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05"
+ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.1"
 
 ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 12"
 
 # Acording to what was tested in the paper, can also be, instead of --num_channels 192, --num_channels 256
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_heads 4 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
 
-ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True --dropout 0.1"
+ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
 
 # change the RUN_MODE at .vscode/settings.json
 RUN if [ "$RUN_MODE" = "train-production" ]; then \
