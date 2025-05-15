@@ -189,11 +189,10 @@ class TrainLoop:
             if self.step % self.val_interval == 0:
                 # self.validate() 
                 with th.no_grad():
-                    with self.model.no_sync():
-                        self.model.eval()
-                        val_batch, val_cond = next(self.val_data)
-                        self.forward_backward(val_batch, val_cond, prefix="val")
-                        self.model.train()
+                    self.model.eval()
+                    val_batch, val_cond = next(self.val_data)
+                    self.forward_backward(val_batch, val_cond, prefix="val")
+                    self.model.train()
             
             self.step += 1
         # Save the last checkpoint if it wasn't already saved.
