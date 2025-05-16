@@ -85,10 +85,11 @@ def main():
     if args.val_data_dir:
         val_data = load_data(
             data_dir=args.val_data_dir,
-            batch_size=args.batch_size,
+            batch_size=args.val_batch_size,
             image_size=args.image_size,
             class_cond=True,
             use_fp16=args.classifier_use_fp16,
+            num_samples=args.val_num_samples,
         )
     else:
         val_data = None
@@ -213,6 +214,7 @@ def create_argparser():
         just_validate = False,
         val_save_suffix = "png",
         val_num_samples=None,
+        val_batch_size=8,
         noised=True,
         iterations=150000,
         lr=3e-4,

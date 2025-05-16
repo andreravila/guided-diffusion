@@ -44,7 +44,7 @@ def main():
 
     val_data = load_data(
         data_dir=args.val_data_dir,
-        batch_size=args.batch_size,
+        batch_size=args.val_batch_size,
         image_size=args.large_size,
         class_cond=args.class_cond,
         deterministic=True,
@@ -110,25 +110,26 @@ def load_superres_data(data_dir, batch_size, large_size, small_size, class_cond=
 def create_argparser():
     defaults = dict(
         # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
-        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/train/hr_128",
-        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/validate-4/hr_128",
-        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_half/val-output",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test/hr_128",
+        val_data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test_1/hr_128",
+        val_out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/val-output_test",
         just_validate = False,
         val_save_suffix = "png",
         val_num_samples=None,
+        val_batch_size=8,
         clip_denoised=True,
         schedule_sampler="uniform",
         lr=3e-6,
         weight_decay=0.0,
         lr_anneal_steps=0,
         batch_size=128,
-        microbatch=4,
+        microbatch=1,
         ema_rate="0.9999",
         log_interval=25,
         save_interval=5000,
         val_interval=500,
         resume_checkpoint="",
-        use_fp16=False,
+        use_fp16=True,
         fp16_scale_growth=1e-3
     )
     defaults.update(sr_model_and_diffusion_defaults())
