@@ -179,8 +179,6 @@ class TrainLoop:
         ):
             batch, cond = next(self.data)
             self.run_step(batch, cond)
-            if self.step % self.log_interval == 0:
-                logger.dumpkvs()
             if self.step % self.save_interval == 0:
                 self.save()
                 # Run for a finite amount of time in integration tests.
@@ -192,7 +190,10 @@ class TrainLoop:
                     self.model.eval()
                     val_batch, val_cond = next(self.val_data)
                     self.forward_backward(val_batch, val_cond, prefix="val")
+                    self.log_step()
                     self.model.train()
+            if self.step % self.log_interval == 0:
+                logger.dumpkvs()
             
             self.step += 1
         # Save the last checkpoint if it wasn't already saved.
