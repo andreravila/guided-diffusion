@@ -224,8 +224,8 @@ def create_argparser():
         microbatch=1,
         schedule_sampler="uniform",
         resume_checkpoint="",
-        log_interval=10,
-        eval_interval=5,
+        log_interval=30,
+        eval_interval=10,
         save_interval=10000,
         use_fp16=True,
         fp16_scale_growth=1e-3

@@ -363,7 +363,7 @@ def sr_create_classifier(
     return EncoderSuperResModel(
         image_size=large_size,
         # Update here to change input channels
-        in_channels=1,
+        in_channels=2,
         # Choose to add or not the low res input
         add_low_res_input=True,
         model_channels=classifier_width,
@@ -483,7 +483,7 @@ def sr_create_model(
     return SuperResModel(
         image_size=large_size,
         # Update here to change input channels
-        in_channels=1,
+        in_channels=2,
         model_channels=num_channels,
         out_channels=(1 if not learn_sigma else 2),
         num_res_blocks=num_res_blocks,

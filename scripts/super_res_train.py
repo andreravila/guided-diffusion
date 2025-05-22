@@ -125,9 +125,9 @@ def create_argparser():
         batch_size=128,
         microbatch=1,
         ema_rate="0.9999",
-        log_interval=25,
+        log_interval=30,
+        val_interval=10,
         save_interval=5000,
-        val_interval=500,
         resume_checkpoint="",
         use_fp16=True,
         fp16_scale_growth=1e-3
