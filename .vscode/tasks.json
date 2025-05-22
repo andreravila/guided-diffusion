@@ -575,10 +575,8 @@
                 "build",
                 "--build-arg",
                 "RUN_MODE=sample-production",
-                "--build-arg",
-                "DATASET_FOLDER=${config:datasetFolder}",
                 "-t",
-                "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}",
+                "andreriescoa/guided-diffusion-sample-production:${config:container_tag}",
                 "."
             ],
             "problemMatcher": "$msCompile",
@@ -607,10 +605,8 @@
                 "build",
                 "--build-arg",
                 "RUN_MODE=sample-classifier-production",
-                "--build-arg",
-                "DATASET_FOLDER=${config:datasetFolder}",
                 "-t",
-                "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}",
+                "andreriescoa/guided-diffusion-sample-classifier-production:${config:container_tag}",
                 "."
             ],
             "problemMatcher": "$msCompile",
@@ -637,7 +633,7 @@
             "type": "process",
             "args": [
                 "push",
-                "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}"
+                "andreriescoa/guided-diffusion-sample-production:${config:container_tag}"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
@@ -663,7 +659,7 @@
             "type": "process",
             "args": [
                 "push",
-                "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}"
+                "andreriescoa/guided-diffusion-sample-classifier-production:${config:container_tag}"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
@@ -690,12 +686,12 @@
             "args": [
                 "run",
                 "-v",
-                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
                 "--gpus",
                 "all",
                 "-m=32g",
                 "--shm-size=2g",
-                "andreriescoa/guided-diffusion-sample-production:${config:datasetFolder}"
+                "andreriescoa/guided-diffusion-sample-production:${config:container_tag}"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
@@ -722,12 +718,12 @@
             "args": [
                 "run",
                 "-v",
-                "./dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}:/home/test/dataset3TSubsetSliced/${config:datasetFolder}/${config:estimatedSamplesFolder}",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
                 "--gpus",
                 "all",
                 "-m=32g",
                 "--shm-size=2g",
-                "andreriescoa/guided-diffusion-sample-classifier-production:${config:datasetFolder}"
+                "andreriescoa/guided-diffusion-sample-classifier-production:${config:container_tag}"
             ],
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",

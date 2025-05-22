@@ -1,8 +1,5 @@
 {
-    // same as data_dir, model_path and classifier_path
-    "datasetFolder": "sliced_dataset_dki_mppca_144_05_b0",
-    // same as out_dir of samples
-    "estimatedSamplesFolder": "estimated_samples_1_classifier_10_low_res",
+    "container_tag": "test"
     /*"docker.environment": {
         "DOCKER_HOST": "ssh://root@114.32.64.6:40088",
     }*/
