@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DATASET_FOLDER="sliced_dataset_dki_mppca_144_05"
-ESTIMATED_SAMPLES_FOLDER="estimated_samples_1_classifier_10_low_res"
-HOST_DIR="dataset3TSubsetSliced/$DATASET_FOLDER/$ESTIMATED_SAMPLES_FOLDER"
-IMAGE="andreriescoa/guided-diffusion-sample-classifier-production:$DATASET_FOLDER"
+RUN_MODE=$(grep '"run_mode"' .vscode/settings.json | sed 's/.*"run_mode": "\(.*\)".*/\1/')
 
-PORT=40088
+CONTAINER_TAG=$(grep '"container_tag"' .vscode/settings.json | sed 's/.*"container_tag": "\(.*\)".*/\1/')
+echo "RUN_MODE: $RUN_MODE"
+echo "CONTAINER_TAG: $CONTAINER_TAG"
 
-TARGET_IP=114.32.64.6
+IMAGE="andreriescoa/guided-diffusion-$RUN_MODE:$CONTAINER_TAG"
+
+TMP_DIR=""
+
+if [[ "$RUN_MODE" == "train" || "$RUN_MODE" == "train-classifier" ]]; then
+  HOST_DIR==$(sed -n 's/^ARG TRAIN_DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
+  TMP_DIR="-v /root/pesquisa/tmp:/tmp"
+else
+  HOST_DIR=$(sed -n 's/^ARG ESTIMATED_SAMPLES_FOLDER=\(.*\)/\1/p' Dockerfile)
+fi
+
+
+PORT=43924
+
+TARGET_IP=114.34.26.236
 
 # ssh -p $PORT root@$TARGET_IP -L 8080:localhost:8080
 ssh -p "$PORT" root@"$TARGET_IP" " \
@@ -18,13 +31,15 @@ docker ps -q | xargs -r docker stop \
 ssh -p $PORT root@$TARGET_IP "mkdir -p /root/pesquisa/$HOST_DIR"
 
 # 1. Push any files that exist locally but not on remote:
-if [ -d "$HOST_DIR" ]; then
-  rsync -avzP -e "ssh -p $PORT" \
-    --ignore-existing \
-    --append-verify \
-    "$HOST_DIR"/ \
-    root@$TARGET_IP:/root/pesquisa/"$HOST_DIR"/
+if [[ "$RUN_MODE" == *sample* ]] && [ -d "$HOST_DIR" ]; then
+    rsync -avzP -e "ssh -p $PORT" \
+      --ignore-existing \
+      --append-verify \
+      "$HOST_DIR"/ \
+      root@$TARGET_IP:/root/pesquisa/"$HOST_DIR"/
+  fi
 fi
+
 
 # scp -P 57709 ./$HOST_DIR root@77.104.167.149:/root/pesquisa/$HOST_DIR 
 
@@ -32,6 +47,7 @@ fi
 ssh -p "$PORT" root@"$TARGET_IP" "\
   docker run --pull=always \
     -v /root/pesquisa/$HOST_DIR:/home/test/$HOST_DIR \
+    $TMP_DIR \
     --gpus all \
     -m 32g \
     --shm-size 2g \

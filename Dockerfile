@@ -25,7 +25,7 @@ ARG RESUME_CHECKPOINT_MODEL=""
 ### Training part of the dataset
 ARG TRAIN_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/train
 ### Validation part of the dataset
-ARG VALIDATE_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/validate
+ARG VALIDATE_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/train/validate
 ### Validation output folder
 ARG VALIDATE_OUTPUT_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/val_output
 
@@ -68,6 +68,7 @@ RUN apt-get -q -y update && \
     python3-venv \
     build-essential \
     libopenmpi-dev \
+    zstd \
     && apt-get clean && apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
 
@@ -84,8 +85,20 @@ RUN . .venv/bin/activate && \
     pip3 install --upgrade pip && pip install -e . && \
     pip3 install -r requirements.txt 
 
-
 ARG DATASET_FOLDER
+
+# Training 
+# Copy .tar.zst files, that will be extracted by the startcommand.sh
+ARG TRAIN_DATASET_FOLDER
+COPY ${TRAIN_DATASET_FOLDER}/hr_128.tar.zst ${TRAIN_DATASET_FOLDER}
+COPY ${TRAIN_DATASET_FOLDER}/sr_16_128.tar.zst ${TRAIN_DATASET_FOLDER}
+ENV TRAIN_DATASET_FOLDER=${TRAIN_DATASET_FOLDER}
+# Validation
+ARG VALIDATE_DATASET_FOLDER
+COPY ${TRAIN_DATASET_FOLDER}/validate.tar.zst ${TRAIN_DATASET_FOLDER}
+ENV VALIDATE_DATASET_FOLDER=${VALIDATE_DATASET_FOLDER}
+ARG VALIDATE_OUTPUT_FOLDER
+
 
 # -------- FOR TRAINING COMMENT FROM HERE -------- 
 # copy the checkpoint model
@@ -107,23 +120,20 @@ ARG TEST_DATASET_FOLDER
 COPY scripts scripts
 COPY guided_diffusion guided_diffusion
 
-# Training 
-# The .tar.zst files will be copied by the script ./run-prod-script.sh
-ARG TRAIN_DATASET_FOLDER
-ARG VALIDATE_DATASET_FOLDER
-ARG VALIDATE_OUTPUT_FOLDER
-
 ARG RESUME_CHECKPOINT_CLASSIFIER
 ARG RESUME_CHECKPOINT_MODEL
 
 # Sampling
 ARG ESTIMATED_SAMPLES_FOLDER
+ENV ESTIMATED_SAMPLES_FOLDER=${ESTIMATED_SAMPLES_FOLDER}
+ENV DATASET_FOLDER=${DATASET_FOLDER}
 ARG USE_DDIM
 ARG CLASSIFIER_SCALE
 
 ARG RUN_MODE
+ENV RUN_MODE=${RUN_MODE}
 
-ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 8 --microbatch 4 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.0 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
+ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 32 --microbatch 4 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.0 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
 
 ENV SAMPLE_FLAGS="--batch_size 12 ${USE_DDIM}  --data_dir ${TEST_DATASET_FOLDER}/hr_128 --model_path ${MODEL_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER} ${USE_DDIM}"
 # using ddim
@@ -140,32 +150,7 @@ ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusio
 
 ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
 
-
-
-RUN if [ "$RUN_MODE" = "train-production" ]; then \
-        echo "python3 scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "train-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    # train classifier
-    elif [ "$RUN_MODE" = "train-classifier-production" ]; then \
-        echo "python3 scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "train-classifier-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
-    # sample
-    elif [ "$RUN_MODE" = "sample-production" ]; then \
-        echo "python3 scripts/super_res_sample.py $SAMPLE_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "sample-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_sample.py $SAMPLE_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    # sample classifier
-    elif [ "$RUN_MODE" = "sample-classifier-production" ]; then \
-        echo "python3 scripts/super_res_classifier_sample.py $SR_MODEL_FLAGS $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
-    elif [ "$RUN_MODE" = "sample-classifier-debug" ]; then \
-        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_classifier_sample.py $SR_MODEL_FLAGS $CLASSIFIER_SAMPLE_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
-    else \
-        echo "Unknown RUN_MODE: $RUN_MODE"; \
-        exit 1; \
-    fi
-
+COPY startcommand.sh startcommand.sh
 RUN chmod +x startcommand.sh
 
 # Activate and run the code

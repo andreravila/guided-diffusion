@@ -627,6 +627,66 @@
             },
         },
         {
+            "label": "build-image-train-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=train-production",
+                "-t",
+                "andreriescoa/guided-diffusion-train-production:${config:container_tag}",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-production"
+            },
+        },
+        {
+            "label": "build-image-train-classifier-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "build",
+                "--build-arg",
+                "RUN_MODE=train-classifier-production",
+                "-t",
+                "andreriescoa/guided-diffusion-train-classifier-production:${config:container_tag}",
+                "."
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "stop-containers"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-production"
+            },
+        },
+        {
             "label": "push-image-sample-production-with-dataset-and-model",
             "detail": "",
             "command": "docker",
@@ -676,6 +736,58 @@
                 "focus": true,
                 "panel": "shared",
                 "group": "sample-classifier-production"
+            },
+        },
+                {
+            "label": "push-image-train-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "push",
+                "andreriescoa/guided-diffusion-train-production:${config:container_tag}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-train-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-production"
+            },
+        },
+        {
+            "label": "push-image-train-classifier-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "push",
+                "andreriescoa/guided-diffusion-train-classifier-production:${config:container_tag}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-train-classifier-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-production"
             },
         },
         {
@@ -740,6 +852,73 @@
                 "focus": true,
                 "panel": "shared",
                 "group": "sample-classifier-production"
+            },
+        },        {
+            "label": "run-image-train-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "andreriescoa/guided-diffusion-train-production:${config:container_tag}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-sample-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-production"
+            },
+        },
+        {
+            "label": "run-image-train-classifier-production-with-dataset-and-model",
+            "detail": "",
+            "command": "docker",
+            "type": "process",
+            "args": [
+                "run",
+                "-v",
+                "./tmp:/tmp",
+                "-v",
+                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "--gpus",
+                "all",
+                "-m=32g",
+                "--shm-size=2g",
+                "andreriescoa/guided-diffusion-train-classifier-production:${config:container_tag}"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build-image-train-classifier-production-with-dataset-and-model"
+            ],
+            "icon": {
+                "id": "vm-active",
+                "color": "terminal.ansiCyan"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared",
+                "group": "train-classifier-production"
             },
         }
     ]
