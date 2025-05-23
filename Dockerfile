@@ -8,9 +8,11 @@ ARG DATASET_FOLDER=sliced_dataset_dki_mppca_144_05_b0
 ### CHECKPOINTS
 ####
 ### Model path
-ARG MODEL_PATH=checkpoint_model/${DATASET_FOLDER}/model
+ARG MODEL_DIR=checkpoint_model/${DATASET_FOLDER}/model
+ARG MODEL_PATH=${MODEL_DIR}/model100000.pt
 ### Classifier path
-ARG CLASSIFIER_PATH=checkpoint_model/${DATASET_FOLDER}/classifier/low_res
+ARG CLASSIFIER_DIR=checkpoint_model/${DATASET_FOLDER}/classifier/dropout02
+ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model045000.pt
 
 ####
 ### TRAINING
@@ -82,11 +84,13 @@ ARG DATASET_FOLDER
 
 # -------- FOR TRAINING COMMENT FROM HERE -------- 
 # copy the checkpoint model
+ARG MODEL_DIR
 ARG MODEL_PATH
-#COPY ${MODEL_PATH} ${MODEL_PATH}
+#COPY ${MODEL_DIR} ${MODEL_DIR}
 # copy the classifier model
+ARG CLASSIFIER_DIR
 ARG CLASSIFIER_PATH
-#COPY ${CLASSIFIER_PATH} ${CLASSIFIER_PATH}
+#COPY ${CLASSIFIER_DIR} ${CLASSIFIER_DIR}
 
 # copy the test part of the dataset, to run the container directly
 ARG TEST_DATASET_FOLDER
@@ -99,9 +103,8 @@ COPY scripts scripts
 COPY guided_diffusion guided_diffusion
 
 # Training 
+# The .tar.zst files will be copied by the script ./run-prod-script.sh
 ARG TRAIN_DATASET_FOLDER
-#COPY ${TRAIN_DATASET_FOLDER}/hr_128 ${TRAIN_DATASET_FOLDER}/hr_128
-#COPY ${TRAIN_DATASET_FOLDER}/sr_16_128 ${TRAIN_DATASET_FOLDER}/sr_16_128
 ARG VALIDATE_DATASET_FOLDER
 ARG VALIDATE_OUTPUT_FOLDER
 
@@ -118,9 +121,9 @@ ENV SAMPLE_FLAGS="--batch_size 12 ${USE_DDIM}  --data_dir ${TEST_DATASET_FOLDER}
 # using ddim
 # ENV SAMPLE_FLAGS="--batch_size 12 --timestep_respacing ddim500 --use_ddim True"
 
-ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --val_batch_size 8 --microbatch 32 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.2 --data_dir ${TRAIN_DATASET_FOLDER} --val_data_dir ${VALIDATE_DATASET_FOLDER} --val_out_dir ${VALIDATE_OUTPUT_FOLDER}"
+ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --val_batch_size 8 --microbatch 32 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.3 --data_dir ${TRAIN_DATASET_FOLDER} --val_data_dir ${VALIDATE_DATASET_FOLDER} --val_out_dir ${VALIDATE_OUTPUT_FOLDER}"
 
-ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 16 ${USE_DDIM} --classifier_scale ${CLASSIFIER_SCALE} --data_dir ${TEST_DATASET_FOLDER} --model_path ${MODEL_PATH} --classifier_path ${CLASSIFIER_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER}"
+ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 1 ${USE_DDIM} --classifier_scale ${CLASSIFIER_SCALE} --data_dir ${TEST_DATASET_FOLDER} --model_path ${MODEL_PATH} --classifier_path ${CLASSIFIER_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER}"
 
 # Acording to what was tested in the paper, can also be, instead of --num_channels 192, --num_channels 256
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_heads 4 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
@@ -130,12 +133,13 @@ ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusio
 
 ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
 
-# change the RUN_MODE at .vscode/settings.json
+
+
 RUN if [ "$RUN_MODE" = "train-production" ]; then \
         echo "python3 scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "train-debug" ]; then \
-    echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
-    # classifier
+        echo "python3 -m debugpy --listen 0.0.0.0:6502 --log-to src/log --wait-for-client scripts/super_res_train.py $TRAIN_FLAGS $SR_MODEL_FLAGS" > startcommand.sh; \
+    # train classifier
     elif [ "$RUN_MODE" = "train-classifier-production" ]; then \
         echo "python3 scripts/super_res_classifier_train.py $CLASSIFIER_TRAIN_FLAGS $CLASSIFIER_SR_MODEL_FLAGS" > startcommand.sh; \
     elif [ "$RUN_MODE" = "train-classifier-debug" ]; then \
