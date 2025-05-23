@@ -2,7 +2,7 @@
 ####
 ### Dataset folder
 ####
-ARG DATASET_FOLDER=sliced_dataset_dki_mppca_144_05_b0
+ARG DATASET_FOLDER=sliced_dataset_dki_mppca_144_05
 
 ####
 ### CHECKPOINTS
@@ -11,12 +11,17 @@ ARG DATASET_FOLDER=sliced_dataset_dki_mppca_144_05_b0
 ARG MODEL_DIR=checkpoint_model/${DATASET_FOLDER}/model
 ARG MODEL_PATH=${MODEL_DIR}/model100000.pt
 ### Classifier path
-ARG CLASSIFIER_DIR=checkpoint_model/${DATASET_FOLDER}/classifier/dropout02
-ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model045000.pt
+ARG CLASSIFIER_DIR=checkpoint_model/${DATASET_FOLDER}/classifier/dropout03
+ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model015000.pt
 
 ####
 ### TRAINING
 ####
+
+#ARG RESUME_CHECKPOINT_CLASSIFIER="--resume_checkpoint ${CLASSIFIER_PATH}"
+ARG RESUME_CHECKPOINT_CLASSIFIER=""
+ARG RESUME_CHECKPOINT_MODEL=""
+
 ### Training part of the dataset
 ARG TRAIN_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/train
 ### Validation part of the dataset
@@ -108,6 +113,9 @@ ARG TRAIN_DATASET_FOLDER
 ARG VALIDATE_DATASET_FOLDER
 ARG VALIDATE_OUTPUT_FOLDER
 
+ARG RESUME_CHECKPOINT_CLASSIFIER
+ARG RESUME_CHECKPOINT_MODEL
+
 # Sampling
 ARG ESTIMATED_SAMPLES_FOLDER
 ARG USE_DDIM
@@ -115,13 +123,13 @@ ARG CLASSIFIER_SCALE
 
 ARG RUN_MODE
 
-ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 8 --microbatch 4 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.0 --data_dir ${TRAIN_DATASET_FOLDER} --val_data_dir ${VALIDATE_DATASET_FOLDER} --val_out_dir ${VALIDATE_OUTPUT_FOLDER}"
+ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 8 --microbatch 4 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.0 --data_dir ${TRAIN_DATASET_FOLDER} --val_data_dir ${VALIDATE_DATASET_FOLDER} --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
 
 ENV SAMPLE_FLAGS="--batch_size 12 ${USE_DDIM}  --data_dir ${TEST_DATASET_FOLDER} --model_path ${MODEL_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER} ${USE_DDIM}"
 # using ddim
 # ENV SAMPLE_FLAGS="--batch_size 12 --timestep_respacing ddim500 --use_ddim True"
 
-ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --val_batch_size 8 --microbatch 32 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.3 --data_dir ${TRAIN_DATASET_FOLDER} --val_data_dir ${VALIDATE_DATASET_FOLDER} --val_out_dir ${VALIDATE_OUTPUT_FOLDER}"
+ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --val_batch_size 128 --microbatch 32 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.3 --data_dir ${TRAIN_DATASET_FOLDER} --val_data_dir ${VALIDATE_DATASET_FOLDER} --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_CLASSIFIER}"
 
 ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 1 ${USE_DDIM} --classifier_scale ${CLASSIFIER_SCALE} --data_dir ${TEST_DATASET_FOLDER} --model_path ${MODEL_PATH} --classifier_path ${CLASSIFIER_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER}"
 
@@ -129,7 +137,6 @@ ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 1 ${USE_DDIM} --classifier_scale ${CLA
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_heads 4 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
 # Optimized, the one used for 128 -> 512 upsampling
 #ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_head_channels 64 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"
-
 
 ENV CLASSIFIER_SR_MODEL_FLAGS="--large_size 128 --small_size 128 --diffusion_steps 2000 --classifier_attention_resolutions 32,16,8 --classifier_depth 2 --classifier_width 128 --classifier_pool attention --classifier_resblock_updown True --classifier_use_scale_shift_norm True --classifier_use_fp16 True"
 
