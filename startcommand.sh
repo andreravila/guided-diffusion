@@ -3,17 +3,16 @@ set -euo pipefail
 
 if [[ "$RUN_MODE" == *train* ]]; then
 
-    if [ -f "$TRAIN_DATASET_FOLDER/hr_128.tar.zst" ] && [ ! -d "$TRAIN_DATASET_FOLDER/hr_128" ]; then
-        tar -I zstd -xvf "$TRAIN_DATASET_FOLDER/hr_128.tar.zst" -C "$TRAIN_DATASET_FOLDER"
+    if [ -f "$TRAIN_DATASET_FOLDER-tmp/hr_128.tar.zst" ] && [ ! -d "$TRAIN_DATASET_FOLDER/hr_128" ]; then
+        tar -I zstd -xvf "$TRAIN_DATASET_FOLDER-tmp/hr_128.tar.zst" -C "$TRAIN_DATASET_FOLDER"
     fi
-    if [ -f "$TRAIN_DATASET_FOLDER/sr_16_128.tar.zst" ] && [ ! -d "$TRAIN_DATASET_FOLDER/sr_16_128" ]; then
-        tar -I zstd -xvf "$TRAIN_DATASET_FOLDER/sr_16_128.tar.zst" -C "$TRAIN_DATASET_FOLDER"
+    if [ -f "$TRAIN_DATASET_FOLDER-tmp/sr_16_128.tar.zst" ] && [ ! -d "$TRAIN_DATASET_FOLDER/sr_16_128" ]; then
+        tar -I zstd -xvf "$TRAIN_DATASET_FOLDER-tmp/sr_16_128.tar.zst" -C "$TRAIN_DATASET_FOLDER"
     fi
-    if [ -f "$TRAIN_DATASET_FOLDER/validate.tar.zst" ] && [ ! -d "$VALIDATE_DATASET_FOLDER" ]; then
-        tar -I zstd -xvf "$TRAIN_DATASET_FOLDER/validate.tar.zst" -C "$TRAIN_DATASET_FOLDER"
+    if [ -f "$TRAIN_DATASET_FOLDER-tmp/validate.tar.zst" ] && [ ! -d "$VALIDATE_DATASET_FOLDER" ]; then
+        tar -I zstd -xvf "$TRAIN_DATASET_FOLDER-tmp/validate.tar.zst" -C "$TRAIN_DATASET_FOLDER"
     fi
 fi
-
 
 if [ "$RUN_MODE" = "train-production" ]; then
 #train

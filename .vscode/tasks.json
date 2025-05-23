@@ -863,7 +863,7 @@
                 "-v",
                 "./tmp:/tmp",
                 "-v",
-                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "./dataset3TSubsetSliced/${config:container_tag}/train:/home/test/dataset3TSubsetSliced/${config:container_tag}/train",
                 "--gpus",
                 "all",
                 "-m=32g",
@@ -873,7 +873,7 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "build-image-sample-production-with-dataset-and-model"
+                "build-image-train-production-with-dataset-and-model"
             ],
             "icon": {
                 "id": "vm-active",
@@ -897,7 +897,7 @@
                 "-v",
                 "./tmp:/tmp",
                 "-v",
-                "./dataset3TSubsetSliced:/home/test/dataset3TSubsetSliced",
+                "./dataset3TSubsetSliced/${config:container_tag}/train:/home/test/dataset3TSubsetSliced/${config:container_tag}/train",
                 "--gpus",
                 "all",
                 "-m=32g",
