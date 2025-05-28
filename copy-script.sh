@@ -1,10 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DATASET_FOLDER="sliced_dataset_dki_mppca_144_05"
-ESTIMATED_SAMPLES_FOLDER="estimated_samples_1_classifier_10_low_res"
-HOST_DIR="dataset3TSubsetSliced/$DATASET_FOLDER/$ESTIMATED_SAMPLES_FOLDER"
-IMAGE="andreriescoa/guided-diffusion-sample-classifier-production:$DATASET_FOLDER"
+RUN_MODE=$(grep '"run_mode"' .vscode/settings.json | sed 's/.*"run_mode": "\(.*\)".*/\1/')
+
+CONTAINER_TAG=$(grep '"container_tag"' .vscode/settings.json | sed 's/.*"container_tag": "\(.*\)".*/\1/')
+echo "RUN_MODE: $RUN_MODE"
+echo "CONTAINER_TAG: $CONTAINER_TAG"
+
+IMAGE="andreriescoa/guided-diffusion-$RUN_MODE:$CONTAINER_TAG"
+
+SRC_DIR=""
+
+if [[ "$RUN_MODE" == *train* ]]; then
+  HOST_DIR="checkpoint_model/$CONTAINER_TAG/tmp-remote-dropout01"
+  SRC_DIR="tmp-copy"
+else
+  HOST_DIR=$(sed -n 's/^ARG ESTIMATED_SAMPLES_FOLDER=\(.*\)/\1/p' Dockerfile)
+  DATASET_FOLDER=$(sed -n 's/^ARG DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
+  # Replace literal "${DATASET_FOLDER}" in HOST_DIR with the actual variable value
+  HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
+  SRC_DIR=$HOST_DIR
+fi
+
+echo "HOST_DIR: $HOST_DIR"
+echo "SRC_DIR: $SRC_DIR"
 
 PORT=40088
 
@@ -18,5 +37,5 @@ mkdir -p ./"$HOST_DIR"
 rsync -avzP -e "ssh -p $PORT" \
   --ignore-existing \
   --append-verify \
-  root@$TARGET_IP:/root/pesquisa/"$HOST_DIR"/ \
+  root@$TARGET_IP:/root/pesquisa/"$SRC_DIR"/ \
   ./"$HOST_DIR"/ 

@@ -2,17 +2,19 @@
 ####
 ### Dataset folder
 ####
-ARG DATASET_FOLDER=sliced_dataset_dki_mppca_144_05_b0
+ARG DATASET_FOLDER=sliced_dataset_dki_mppca_144_05
 
 ####
 ### CHECKPOINTS
 ####
 ### Model path
 ARG MODEL_DIR=checkpoint_model/${DATASET_FOLDER}/model
-ARG MODEL_PATH=${MODEL_DIR}/model100000.pt
+ARG MODEL_NUMBER=100000
+ARG MODEL_PATH=${MODEL_DIR}/model${MODEL_NUMBER}.pt
 ### Classifier path
 ARG CLASSIFIER_DIR=checkpoint_model/${DATASET_FOLDER}/classifier/dropout03
-ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model015000.pt
+ARG CLASSIFIER_NUMBER=015000
+ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model${CLASSIFIER_NUMBER}.pt
 
 ####
 ### TRAINING
@@ -20,7 +22,7 @@ ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model015000.pt
 
 #ARG RESUME_CHECKPOINT_CLASSIFIER="--resume_checkpoint ${CLASSIFIER_PATH}"
 ARG RESUME_CHECKPOINT_CLASSIFIER=""
-ARG RESUME_CHECKPOINT_MODEL=""
+ARG RESUME_CHECKPOINT_MODEL="--resume_checkpoint ${MODEL_PATH}"
 
 ### Training part of the dataset
 ARG TRAIN_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/train
@@ -33,9 +35,9 @@ ARG VALIDATE_OUTPUT_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/val_output
 ### SAMPLING
 ####
 ### Test part of the dataset
-ARG TEST_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/test_1
+ARG TEST_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/train/train_1
 ### Estimated output samples folder
-ARG ESTIMATED_SAMPLES_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/estimated_samples
+ARG ESTIMATED_SAMPLES_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/estimated_samples_train_100000
 ### DDIM
 # --timestep_respacing ddim500 --use_ddim True
 ARG USE_DDIM="--use_ddim False"
@@ -87,7 +89,7 @@ RUN . .venv/bin/activate && \
 
 ARG DATASET_FOLDER
 
-# Training 
+# -------- Training ---------
 # Copy .tar.zst files, that will be extracted by the startcommand.sh
 ARG TRAIN_DATASET_FOLDER
 COPY ${TRAIN_DATASET_FOLDER}/hr_128.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/hr_128.tar.zst
@@ -98,23 +100,26 @@ ARG VALIDATE_DATASET_FOLDER
 COPY ${TRAIN_DATASET_FOLDER}/validate.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/validate.tar.zst
 ENV VALIDATE_DATASET_FOLDER=${VALIDATE_DATASET_FOLDER}
 ARG VALIDATE_OUTPUT_FOLDER
+# ---------------------------
 
-
-# -------- FOR TRAINING COMMENT FROM HERE -------- 
-# copy the checkpoint model
-ARG MODEL_DIR
-ARG MODEL_PATH
-#COPY ${MODEL_DIR} ${MODEL_DIR}
-# copy the classifier model
-ARG CLASSIFIER_DIR
-ARG CLASSIFIER_PATH
-#COPY ${CLASSIFIER_DIR} ${CLASSIFIER_DIR}
-
+# -------- Sampling ---------
 # copy the test part of the dataset, to run the container directly
 ARG TEST_DATASET_FOLDER
-#COPY ${TEST_DATASET_FOLDER} ${TEST_DATASET_FOLDER}
+COPY ${TEST_DATASET_FOLDER} ${TEST_DATASET_FOLDER}
+# ---------------------------
 
-# -------- TO HERE -------- 
+# ------- Checkpoints -------
+# copy the checkpoint model
+ARG MODEL_DIR
+ARG MODEL_NUMBER
+ARG MODEL_PATH
+COPY ${MODEL_DIR}/*${MODEL_NUMBER}.pt ${MODEL_DIR}/
+# copy the classifier model
+ARG CLASSIFIER_DIR
+ARG CLASSIFIER_NUMBER
+ARG CLASSIFIER_PATH
+# COPY ${CLASSIFIER_DIR}/*${CLASSIFIER_NUMBER}.pt ${CLASSIFIER_DIR}
+# --------------------------
 
 # copy the rest of the application
 COPY scripts scripts
@@ -133,15 +138,15 @@ ARG CLASSIFIER_SCALE
 ARG RUN_MODE
 ENV RUN_MODE=${RUN_MODE}
 
-ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 32 --microbatch 4 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.0 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
+ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 128 --microbatch 16 --lr 1e-6 --save_interval 5000 --weight_decay 0.05 --dropout 0.0 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
 
-ENV SAMPLE_FLAGS="--batch_size 12 ${USE_DDIM}  --data_dir ${TEST_DATASET_FOLDER}/hr_128 --model_path ${MODEL_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER} ${USE_DDIM}"
+ENV SAMPLE_FLAGS="--batch_size 16 ${USE_DDIM}  --data_dir ${TEST_DATASET_FOLDER}/hr_128 --model_path ${MODEL_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER} ${USE_DDIM}"
 # using ddim
 # ENV SAMPLE_FLAGS="--batch_size 12 --timestep_respacing ddim500 --use_ddim True"
 
 ENV CLASSIFIER_TRAIN_FLAGS="--iterations 100000 --anneal_lr True --batch_size 128 --val_batch_size 128 --microbatch 32 --lr 1e-5 --save_interval 5000 --weight_decay 0.05 --dropout 0.3 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_CLASSIFIER}"
 
-ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 1 ${USE_DDIM} --classifier_scale ${CLASSIFIER_SCALE} --data_dir ${TEST_DATASET_FOLDER}/hr_128 --model_path ${MODEL_PATH} --classifier_path ${CLASSIFIER_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER}"
+ENV CLASSIFIER_SAMPLE_FLAGS="--batch_size 16 ${USE_DDIM} --classifier_scale ${CLASSIFIER_SCALE} --data_dir ${TEST_DATASET_FOLDER}/hr_128 --model_path ${MODEL_PATH} --classifier_path ${CLASSIFIER_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER}"
 
 # Acording to what was tested in the paper, can also be, instead of --num_channels 192, --num_channels 256
 ENV SR_MODEL_FLAGS="--attention_resolutions 32,16,8 --class_cond True --diffusion_steps 2000 --large_size 128 --small_size 128 --learn_sigma True --noise_schedule linear --num_channels 192 --num_heads 4 --num_res_blocks 2 --resblock_updown True --use_fp16 True --use_scale_shift_norm True"

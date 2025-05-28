@@ -11,12 +11,17 @@ IMAGE="andreriescoa/guided-diffusion-$RUN_MODE:$CONTAINER_TAG"
 
 TMP_DIR=""
 
+DATASET_FOLDER=$(sed -n 's/^ARG DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
+
 if [[ "$RUN_MODE" == *train* ]]; then
   HOST_DIR=$(sed -n 's/^ARG TRAIN_DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
   TMP_DIR="-v /root/pesquisa/tmp:/tmp"
 else
   HOST_DIR=$(sed -n 's/^ARG ESTIMATED_SAMPLES_FOLDER=\(.*\)/\1/p' Dockerfile)
 fi
+
+# Replace literal "${DATASET_FOLDER}" in HOST_DIR with the actual variable value
+HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
 
 echo "HOST_DIR: $HOST_DIR"
 
