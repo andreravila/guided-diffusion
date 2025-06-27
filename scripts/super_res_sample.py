@@ -26,6 +26,9 @@ from PIL import Image
 def main():
     args = create_argparser().parse_args()
 
+    if args.use_ddim and '_' in args.timestep_respacing:
+        args.timestep_respacing = [int(x) for x in args.timestep_respacing.split("_")]
+
     dist_util.setup_dist()
     logger.configure()
 
@@ -95,6 +98,10 @@ def main():
         )
         if args.save_suffix == "npy":
             sample_batch = ((sample_batch + 1) / 2).clamp(0, 1)
+            #if args.use_fp16:
+            #    sample_batch = sample_batch.to(th.float16)
+            #else:
+            #    sample_batch = sample_batch.to(th.float32)
         else:
             sample_batch = ((sample_batch + 1) * 127.5).clamp(0, 255).to(th.uint8)
         
@@ -162,9 +169,9 @@ def create_argparser():
         use_ddim=False,
         use_fp16=True,
         # Pass */hr_128 as path, when loading the dataset it will load the hig_res path, replace it with sr_16_128, and load the low_res path
-        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_b0/test_1/hr_128",
-        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05_b0/estimated_samples_1",
-        model_path="checkpoint_model/sliced_dataset_dki_mppca_144_05_b0/model/model100000.pt",
+        data_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/test_1/hr_128",
+        out_dir="./dataset3TSubsetSliced/sliced_dataset_dki_mppca_144_05/opt/estimated_samples_1",
+        model_path="checkpoint_model/sliced_dataset_dki_mppca_144_05/opt/model/model050000.pt",
     )
     defaults.update(sr_model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

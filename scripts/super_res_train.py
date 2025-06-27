@@ -118,7 +118,7 @@ def create_argparser():
         val_num_samples=None,
         val_batch_size=8,
         clip_denoised=True,
-        schedule_sampler="uniform",
+        schedule_sampler="uniform", #loss-second-moment,
         lr=3e-6,
         weight_decay=0.0,
         lr_anneal_steps=0,

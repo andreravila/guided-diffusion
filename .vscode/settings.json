@@ -1,10 +1,11 @@
 {
-    "container_tag": "sliced_dataset_dki_mppca_144_05_b0",
+    "container_tag": "sliced_dataset_dti_None_54_0111_b0",
     // Variable used in run-prod-script.sh
     //train, train-classifier, sample, sample-classifier -> All with -production in the end (-debug is also possible, but not used on run-prod-script)
     // train-production, train-classifier-production, sample-production, sample-classifier-production
-    "run_mode": "train-classifier-production"
-    /*"docker.environment": {
-        "DOCKER_HOST": "ssh://root@114.32.64.6:40088",
+    "run_mode": "train-production",
+    /*
+    "docker.environment": {
+        "DOCKER_HOST": "ssh://root@213.108.196.111:46597"
     }*/
 }

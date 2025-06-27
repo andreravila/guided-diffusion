@@ -31,6 +31,9 @@ from PIL import Image
 def main():
     args = create_argparser().parse_args()
 
+    if args.use_ddim and '_' in args.timestep_respacing:
+        args.timestep_respacing = [int(x) for x in args.timestep_respacing.split("_")]
+
     dist_util.setup_dist()
     logger.configure()
 

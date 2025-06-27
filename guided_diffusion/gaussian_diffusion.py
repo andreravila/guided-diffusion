@@ -693,6 +693,10 @@ class GaussianDiffusion:
 
         for i in indices:
             t = th.tensor([i] * shape[0], device=device)
+            # Use DDPM if there is no timestep respacing
+            if i > 0 and self.timestep_map[i] - self.timestep_map[i - 1] == 1:
+                eta = 1.0
+            
             with th.no_grad():
                 out = self.ddim_sample(
                     model,

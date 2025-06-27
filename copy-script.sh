@@ -11,12 +11,15 @@ IMAGE="andreriescoa/guided-diffusion-$RUN_MODE:$CONTAINER_TAG"
 
 SRC_DIR=""
 
+DATASET_FOLDER=$(sed -n 's/^ARG DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
+
 if [[ "$RUN_MODE" == *train* ]]; then
-  HOST_DIR="checkpoint_model/$CONTAINER_TAG/tmp-remote-dropout01"
+  HOST_DIR=$(sed -n 's/^ARG MODEL_DIR=\(.*\)/\1/p' Dockerfile)
+  # Replace literal "${DATASET_FOLDER}" in HOST_DIR with the actual variable value
+  HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
   SRC_DIR="tmp-copy"
 else
   HOST_DIR=$(sed -n 's/^ARG ESTIMATED_SAMPLES_FOLDER=\(.*\)/\1/p' Dockerfile)
-  DATASET_FOLDER=$(sed -n 's/^ARG DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
   # Replace literal "${DATASET_FOLDER}" in HOST_DIR with the actual variable value
   HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
   SRC_DIR=$HOST_DIR
@@ -25,9 +28,16 @@ fi
 echo "HOST_DIR: $HOST_DIR"
 echo "SRC_DIR: $SRC_DIR"
 
-PORT=40088
 
+# train
+PORT=41442
 TARGET_IP=114.32.64.6
+
+# train b0
+PORT=43956
+TARGET_IP=114.34.26.236
+
+
 
 # ssh -p $PORT root@$TARGET_IP -L 8080:localhost:8080
 

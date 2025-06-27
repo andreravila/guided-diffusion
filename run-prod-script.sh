@@ -16,6 +16,7 @@ DATASET_FOLDER=$(sed -n 's/^ARG DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
 if [[ "$RUN_MODE" == *train* ]]; then
   HOST_DIR=$(sed -n 's/^ARG TRAIN_DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
   TMP_DIR="-v /root/pesquisa/tmp:/tmp"
+  CHECKPOINT_MODEL_DIR="-v /root/pesquisa/checkpoint_model:/home/test/checkpoint_model"
 else
   HOST_DIR=$(sed -n 's/^ARG ESTIMATED_SAMPLES_FOLDER=\(.*\)/\1/p' Dockerfile)
 fi
@@ -25,12 +26,20 @@ HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
 
 echo "HOST_DIR: $HOST_DIR"
 
+# o que iniciou mais tarde é o device 0, onde esta o reshape
 
-#PORT=43924
-PORT=42841
+# train
+PORT=41442
+TARGET_IP=114.32.64.6
 
-#TARGET_IP=114.34.26.236
-TARGET_IP=192.80.148.226
+# train b0
+PORT=43956
+TARGET_IP=114.34.26.236
+
+
+# Update the GPU device to 0, and also on settings.json "container_tag": "sliced_dataset_dki_mppca_144_05",
+GPU_DEVICE="device=0"
+
 
 # ssh -p $PORT root@$TARGET_IP -L 8080:localhost:8080
 ssh -p "$PORT" root@"$TARGET_IP" " \
@@ -56,7 +65,7 @@ ssh -t -p "$PORT" root@"$TARGET_IP" "\
   docker run --pull=always \
     -v /root/pesquisa/$HOST_DIR:/home/test/$HOST_DIR \
     $TMP_DIR \
-    --gpus all \
+    --gpus '$GPU_DEVICE' \
     -m 32g \
     --shm-size 2g \
     $IMAGE
