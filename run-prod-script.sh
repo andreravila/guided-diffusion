@@ -27,24 +27,30 @@ HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
 echo "HOST_DIR: $HOST_DIR"
 
 # o que iniciou mais tarde é o device 0, onde esta o reshape
-
-# train
-PORT=41442
-TARGET_IP=114.32.64.6
-
-# train b0
-PORT=43956
-TARGET_IP=114.34.26.236
-
+# sample classifier test 4
+#PORT=43956
+#TARGET_IP=114.34.26.236
 
 # Update the GPU device to 0, and also on settings.json "container_tag": "sliced_dataset_dki_mppca_144_05",
+#GPU_DEVICE="device=0"
+
+
+# train 01 b0 half
+PORT=40738
+TARGET_IP=84.2.197.162
+GPU_DEVICE="device=0"
+
+# train 025 b0 half
+PORT=56699
+TARGET_IP=82.79.4.199
 GPU_DEVICE="device=0"
 
 
+
 # ssh -p $PORT root@$TARGET_IP -L 8080:localhost:8080
-ssh -p "$PORT" root@"$TARGET_IP" " \
-docker ps -q | xargs -r docker stop \
-"
+#ssh -p "$PORT" root@"$TARGET_IP" " \
+#docker ps -q | xargs -r docker stop \
+#"
 
 ssh -p $PORT root@$TARGET_IP "mkdir -p /root/pesquisa/$HOST_DIR"
 
@@ -72,14 +78,10 @@ ssh -t -p "$PORT" root@"$TARGET_IP" "\
 "
 
 # 3. Pull any files that exist on remote but not locally:
-if [[ "$RUN_MODE" == *train* ]]
-  HOST_DIR=$HOST_DIR/tmp
-fi
+#mkdir -p ./"$HOST_DIR"
 
-mkdir -p ./"$HOST_DIR"
-
-rsync -avzP -e "ssh -p $PORT" \
-  --ignore-existing \
-  --append-verify \
-  root@$TARGET_IP:/root/pesquisa/"$HOST_DIR"/ \
-  ./"$HOST_DIR"/ 
+#rsync -avzP -e "ssh -p $PORT" \
+#  --ignore-existing \
+#  --append-verify \
+#  root@$TARGET_IP:/root/pesquisa/"$SRC_DIR"/ \
+#  ./"$HOST_DIR"/ 

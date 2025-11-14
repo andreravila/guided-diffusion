@@ -13,7 +13,12 @@ SRC_DIR=""
 
 DATASET_FOLDER=$(sed -n 's/^ARG DATASET_FOLDER=\(.*\)/\1/p' Dockerfile)
 
-if [[ "$RUN_MODE" == *train* ]]; then
+if [[ "$RUN_MODE" == *train-classifier* ]]; then
+  HOST_DIR=$(sed -n 's/^ARG CLASSIFIER_DIR=\(.*\)/\1/p' Dockerfile)
+  # Replace literal "${DATASET_FOLDER}" in HOST_DIR with the actual variable value
+  HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
+  SRC_DIR="tmp-copy-classifier"
+elif [[ "$RUN_MODE" == *train* ]]; then
   HOST_DIR=$(sed -n 's/^ARG MODEL_DIR=\(.*\)/\1/p' Dockerfile)
   # Replace literal "${DATASET_FOLDER}" in HOST_DIR with the actual variable value
   HOST_DIR="${HOST_DIR//\$\{DATASET_FOLDER\}/$DATASET_FOLDER}"
@@ -29,13 +34,11 @@ echo "HOST_DIR: $HOST_DIR"
 echo "SRC_DIR: $SRC_DIR"
 
 
-# train
-PORT=41442
-TARGET_IP=114.32.64.6
+# train 01 b0 half
+PORT=40738
+TARGET_IP=84.2.197.162
+GPU_DEVICE="device=0"
 
-# train b0
-PORT=43956
-TARGET_IP=114.34.26.236
 
 
 

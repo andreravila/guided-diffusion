@@ -2,8 +2,7 @@
 ####
 ### Dataset folder
 ####
-ARG DATASET_FOLDER=sliced_dataset_dti_None_54_0111_b0
-
+ARG DATASET_FOLDER=sliced_dataset_dti_mppca_72_01_half_b0
 ####
 ### CHECKPOINTS
 ####
@@ -13,7 +12,7 @@ ARG MODEL_NUMBER=100000
 ARG MODEL_PATH=${MODEL_DIR}/model${MODEL_NUMBER}.pt
 ### Classifier path
 ARG CLASSIFIER_DIR=checkpoint_model/${DATASET_FOLDER}/classifier/dropout05
-ARG CLASSIFIER_NUMBER=099999
+ARG CLASSIFIER_NUMBER=100000
 ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model${CLASSIFIER_NUMBER}.pt
 
 ####
@@ -22,8 +21,8 @@ ARG CLASSIFIER_PATH=${CLASSIFIER_DIR}/model${CLASSIFIER_NUMBER}.pt
 
 #ARG RESUME_CHECKPOINT_CLASSIFIER="--resume_checkpoint ${CLASSIFIER_PATH}"
 ARG RESUME_CHECKPOINT_CLASSIFIER=""
-#ARG RESUME_CHECKPOINT_MODEL="--resume_checkpoint ${MODEL_PATH}"
-ARG RESUME_CHECKPOINT_MODEL=""
+ARG RESUME_CHECKPOINT_MODEL="--resume_checkpoint ${MODEL_PATH}"
+#ARG RESUME_CHECKPOINT_MODEL=""
 
 ### Training part of the dataset
 ARG TRAIN_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/train
@@ -36,9 +35,9 @@ ARG VALIDATE_OUTPUT_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/val_output
 ### SAMPLING
 ####
 ### Test part of the dataset
-ARG TEST_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/test/test_1
+ARG TEST_DATASET_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/test
 ### Estimated output samples folder
-ARG ESTIMATED_SAMPLES_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/estimated_samples_test_classifier_5_099999
+ARG ESTIMATED_SAMPLES_FOLDER=dataset3TSubsetSliced/${DATASET_FOLDER}/estimated_samples_test
 ### DDIM
 # --timestep_respacing ddim500 --use_ddim True
 # or
@@ -96,12 +95,12 @@ ARG DATASET_FOLDER
 # -------- Training ---------
 # Copy .tar.zst files, that will be extracted by the startcommand.sh
 ARG TRAIN_DATASET_FOLDER
-COPY ${TRAIN_DATASET_FOLDER}/hr_128.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/hr_128.tar.zst
-COPY ${TRAIN_DATASET_FOLDER}/sr_16_128.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/sr_16_128.tar.zst 
+#COPY ${TRAIN_DATASET_FOLDER}/hr_128.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/hr_128.tar.zst
+#COPY ${TRAIN_DATASET_FOLDER}/sr_16_128.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/sr_16_128.tar.zst 
 ENV TRAIN_DATASET_FOLDER=${TRAIN_DATASET_FOLDER}
 # Validation
 ARG VALIDATE_DATASET_FOLDER
-COPY ${TRAIN_DATASET_FOLDER}/validate.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/validate.tar.zst
+#COPY ${TRAIN_DATASET_FOLDER}/validate.tar.zst ${TRAIN_DATASET_FOLDER}-tmp/validate.tar.zst
 ENV VALIDATE_DATASET_FOLDER=${VALIDATE_DATASET_FOLDER}
 ARG VALIDATE_OUTPUT_FOLDER
 # ---------------------------
@@ -111,7 +110,7 @@ ARG VALIDATE_OUTPUT_FOLDER
 ARG MODEL_DIR
 ARG MODEL_NUMBER
 ARG MODEL_PATH
-#COPY ${MODEL_DIR}/*${MODEL_NUMBER}.pt ${MODEL_DIR}/
+COPY ${MODEL_DIR}/*${MODEL_NUMBER}.pt ${MODEL_DIR}/
 # copy the classifier model
 ARG CLASSIFIER_DIR
 ARG CLASSIFIER_NUMBER
@@ -122,7 +121,7 @@ ARG CLASSIFIER_PATH
 # -------- Sampling ---------
 # copy the test part of the dataset, to run the container directly
 ARG TEST_DATASET_FOLDER
-#COPY ${TEST_DATASET_FOLDER} ${TEST_DATASET_FOLDER}
+COPY ${TEST_DATASET_FOLDER} ${TEST_DATASET_FOLDER}
 # ---------------------------
 
 
@@ -144,7 +143,7 @@ ARG CLASSIFIER_SCALE
 ARG RUN_MODE
 ENV RUN_MODE=${RUN_MODE}
 
-ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 128 --microbatch 16 --lr 2e-6 --save_interval 10000 --weight_decay 0.05 --dropout 0.1 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
+ENV TRAIN_FLAGS="--lr_anneal_steps 100000 --batch_size 128 --val_batch_size 128 --microbatch 16 --lr 5e-6 --save_interval 10000 --weight_decay 0.05 --dropout 0 --data_dir ${TRAIN_DATASET_FOLDER}/hr_128 --val_data_dir ${VALIDATE_DATASET_FOLDER}/hr_128 --val_out_dir ${VALIDATE_OUTPUT_FOLDER} ${RESUME_CHECKPOINT_MODEL}"
 
 ENV SAMPLE_FLAGS="--batch_size 32 ${USE_DDIM}  --data_dir ${TEST_DATASET_FOLDER}/hr_128 --model_path ${MODEL_PATH} --out_dir ${ESTIMATED_SAMPLES_FOLDER} ${USE_DDIM}"
 # using ddim
